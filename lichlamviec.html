@@ -1,152 +1,160 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hệ Thống Quản Lý Công Việc & Hiệu Suất Thông Minh</title>
+    <title>Hệ Thống Quản Lý Công Việc & Hiệu Suất Doanh Nghiệp</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --accent-cyan: #38bdf8;
-            --accent-purple: #a855f7;
-            --priority-high: #ef4444;
-            --priority-medium: #f59e0b;
-            --priority-low: #10b981;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
+        /* CSS VARIABLE THEMES */
+        [data-theme="dark"] {
+            --bg-main: #09090b;
+            --panel-bg: #18181b;
+            --panel-border: #27272a;
+            --accent-primary: #ffffff;
+            --text-main: #fafafa;
+            --text-sub: #a1a1aa;
+            --input-bg: #09090b;
+            --btn-hover: #e4e4e7;
+            --chart-grid: rgba(255,255,255,0.05);
+            --toast-bg: #18181b;
         }
 
-        /* Mobile & Low-End PC Performance Reset */
+        [data-theme="light"] {
+            --bg-main: #f1f5f9;
+            --panel-bg: #ffffff;
+            --panel-border: #e2e8f0;
+            --accent-primary: #09090b;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --input-bg: #f8fafc;
+            --btn-hover: #27272a;
+            --chart-grid: rgba(0,0,0,0.05);
+            --toast-bg: #ffffff;
+        }
+
+        /* Mobile & Low-End Performance Reset */
         * { 
             margin: 0; 
             padding: 0; 
             box-sizing: border-box; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
             text-rendering: optimizeSpeed;
         }
 
         body { 
-            background: var(--bg-gradient); 
-            background-attachment: fixed; 
+            background-color: var(--bg-main); 
             min-height: 100vh; 
             color: var(--text-main); 
             display: flex; 
             justify-content: center; 
             align-items: flex-start; 
             padding: 20px; 
+            transition: background-color 0.2s, color 0.2s;
         }
 
         /* --- WRAPPERS --- */
-        .login-wrapper { width: 100%; max-width: 400px; margin-top: 80px; display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease; }
-        .main-wrapper { width: 100%; max-width: 1200px; display: none; gap: 24px; animation: fadeIn 0.3s ease; flex-direction: row; align-items: flex-start; }
+        .login-wrapper { width: 100%; max-width: 400px; margin-top: 80px; display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.25s ease; }
+        .main-wrapper { width: 100%; max-width: 1200px; display: none; gap: 20px; animation: fadeIn 0.25s ease; flex-direction: row; align-items: flex-start; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- LAYOUT 2 CỘT --- */
-        .sidebar-left { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 20px; }
-        .workspace-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+        .sidebar-left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; position: sticky; top: 20px; }
+        .workspace-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
 
-        /* --- CINEMATIC CARD BASE --- */
-        .cinematic-card { 
-            background: var(--glass-bg); 
-            backdrop-filter: blur(16px); 
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border); 
-            border-radius: 20px; 
-            padding: 22px; 
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1); 
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s; 
+        /* --- FLUENT CARD BASE --- */
+        .fluent-card { 
+            background: var(--panel-bg); 
+            border: 1px solid var(--panel-border); 
+            border-radius: 8px; 
+            padding: 20px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); 
+            transition: border-color 0.2s, background-color 0.2s; 
             overflow: hidden; 
             contain: layout style paint;
-            transform: translate3d(0, 0, 0); /* Hardware GPU Layering for low-end PC & mobile */
-            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
             backface-visibility: hidden;
-        }
-        @media (hover: hover) {
-            .cinematic-card:hover { border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.15); }
         }
 
         /* --- SIDEBAR COMPONENTS --- */
-        .user-panel { text-align: center; position: relative; }
-        .user-panel h2 { font-size: 1.25rem; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
+        .user-panel { text-align: left; position: relative; }
+        .user-panel h2 { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
         .user-panel p { font-size: 0.8rem; color: var(--text-sub); }
-        .btn-logout { margin-top: 12px; width: 100%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: background 0.2s, color 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .btn-logout:active, .btn-logout:hover { background: #ef4444; color: #fff; }
+        .btn-logout { margin-top: 14px; width: 100%; background: transparent; border: 1px solid var(--panel-border); color: #ef4444; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: background 0.15s, border-color 0.15s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-logout:hover, .btn-logout:active { background: var(--input-bg); border-color: #ef4444; }
 
         /* --- DROPDOWN CONTROL --- */
-        .dropdown-menu-card { background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(56, 189, 248, 0.15)); border: 1px solid rgba(168, 85, 247, 0.3); }
-        .dropdown-label { font-size: 0.85rem; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .dropdown-menu-card { background: var(--panel-bg); border: 1px solid var(--panel-border); }
+        .dropdown-label { font-size: 0.75rem; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         
         .function-dropdown { 
             width: 100%; 
-            background: rgba(15, 23, 42, 0.9); 
-            border: 1px solid var(--accent-cyan); 
-            color: #fff; 
-            padding: 12px 14px; 
-            border-radius: 12px; 
-            font-size: 0.95rem; 
+            background: var(--input-bg); 
+            border: 1px solid var(--panel-border); 
+            color: var(--text-main); 
+            padding: 10px 12px; 
+            border-radius: 6px; 
+            font-size: 0.88rem; 
             font-weight: 600; 
             outline: none; 
             cursor: pointer; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.15s;
         }
-        .function-dropdown:focus { border-color: var(--accent-purple); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
-        .function-dropdown option { background: #0f172a; color: #fff; padding: 10px; }
+        .function-dropdown:focus { border-color: var(--accent-primary); }
+        .function-dropdown option { background: var(--panel-bg); color: var(--text-main); padding: 8px; }
 
         /* --- CLOCK CARD --- */
-        .clock-card { text-align: center; padding: 16px; background: rgba(0,0,0,0.2); }
-        .clock-time { font-size: 2.2rem; font-weight: 800; letter-spacing: 2px; background: linear-gradient(90deg, #38bdf8, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-variant-numeric: tabular-nums; }
-        .clock-date { color: var(--text-sub); font-size: 0.85rem; margin-top: 2px; }
+        .clock-card { text-align: center; padding: 16px; background: var(--input-bg); }
+        .clock-time { font-size: 2rem; font-weight: 800; letter-spacing: 2px; color: var(--text-main); font-variant-numeric: tabular-nums; }
+        .clock-date { color: var(--text-sub); font-size: 0.8rem; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* --- DATE NAVIGATOR --- */
-        .date-nav { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: rgba(0, 0, 0, 0.25); padding: 8px; border-radius: 12px; border: 1px solid var(--glass-border); }
-        .date-nav-btn { background: rgba(255, 255, 255, 0.08); border: none; color: var(--text-main); padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.2s; font-size: 0.8rem; }
-        .date-nav-btn:active, .date-nav-btn:hover { background: var(--accent-purple); }
-        .date-picker-input { background: transparent; border: none; color: var(--accent-cyan); font-weight: 700; font-size: 0.9rem; cursor: pointer; outline: none; text-align: center; width: 120px; }
+        .date-nav { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: var(--input-bg); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--panel-border); }
+        .date-nav-btn { background: transparent; border: none; color: var(--text-sub); padding: 6px 10px; border-radius: 4px; cursor: pointer; transition: background 0.15s, color 0.15s; font-size: 0.8rem; }
+        .date-nav-btn:hover, .date-nav-btn:active { background: var(--panel-border); color: var(--text-main); }
+        .date-picker-input { background: transparent; border: none; color: var(--text-main); font-weight: 600; font-size: 0.85rem; cursor: pointer; outline: none; text-align: center; width: 110px; }
 
         /* --- LOGIN SCREEN --- */
-        .login-header { text-align: center; margin-bottom: 25px; }
-        .login-header i { font-size: 2.5rem; color: var(--accent-purple); margin-bottom: 10px; }
+        .login-header { text-align: center; margin-bottom: 20px; }
+        .login-header i { font-size: 2.2rem; color: var(--accent-primary); margin-bottom: 10px; }
 
         /* --- ACCORDION & CARDS --- */
         .card-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-        .card-title { font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 12px; background: linear-gradient(90deg, #ffffff, var(--accent-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .toggle-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: center; color: var(--text-sub); transition: transform 0.25s ease; }
-        .cinematic-card.collapsed .toggle-icon { transform: rotate(-90deg); }
-        .card-body { max-height: 1800px; opacity: 1; margin-top: 18px; transition: max-height 0.25s ease, opacity 0.25s ease; }
-        .cinematic-card.collapsed .card-body { max-height: 0; opacity: 0; margin-top: 0; pointer-events: none; }
+        .card-title { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 10px; color: var(--text-main); letter-spacing: -0.2px; }
+        .toggle-icon { width: 28px; height: 28px; border-radius: 4px; background: var(--input-bg); border: 1px solid var(--panel-border); display: flex; align-items: center; justify-content: center; color: var(--text-sub); transition: transform 0.2s ease; }
+        .fluent-card.collapsed .toggle-icon { transform: rotate(-90deg); }
+        .card-body { max-height: 1800px; opacity: 1; margin-top: 16px; transition: max-height 0.25s ease, opacity 0.25s ease; }
+        .fluent-card.collapsed .card-body { max-height: 0; opacity: 0; margin-top: 0; pointer-events: none; }
 
         /* --- CHIPS & FORMS --- */
         .suggestion-header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .suggestion-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-        .sug-chip { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); padding: 10px 12px; border-radius: 12px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; transition: transform 0.15s, background 0.15s; contain: content; }
-        .sug-chip:active, .sug-chip:hover { background: rgba(168, 85, 247, 0.2); transform: translateY(-2px); }
-        .sug-chip-del { color: #ef4444; font-size: 0.85rem; opacity: 0.6; padding: 2px 4px; transition: opacity 0.2s; }
-        .sug-chip-del:hover { opacity: 1; }
-        .btn-custom-sug { background: rgba(56, 189, 248, 0.15); border: 1px dashed var(--accent-cyan); color: var(--accent-cyan); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: background 0.2s; }
-        
-        .input-form { display: flex; flex-direction: column; gap: 12px; }
+        .suggestion-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+        .sug-chip { background: var(--input-bg); border: 1px solid var(--panel-border); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; transition: border-color 0.15s, background 0.15s; contain: content; color: var(--text-main); }
+        .sug-chip:hover, .sug-chip:active { border-color: var(--accent-primary); background: var(--panel-border); }
+        .sug-chip-del { color: var(--text-sub); font-size: 0.8rem; opacity: 0.6; padding: 2px 4px; }
+        .sug-chip-del:hover { color: #ef4444; opacity: 1; }
+        .btn-custom-sug { background: transparent; border: 1px solid var(--text-main); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600; }
+        .btn-custom-sug:hover { background: var(--text-main); color: var(--bg-main); }
+
+        .input-form { display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 10px; flex-wrap: wrap; }
-        .input-field { background: rgba(0, 0, 0, 0.25); border: 1px solid var(--glass-border); color: var(--text-main); padding: 12px 14px; border-radius: 10px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; width: 100%; }
-        .input-field:focus { border-color: var(--accent-cyan); }
+        .input-field { background: var(--input-bg); border: 1px solid var(--panel-border); color: var(--text-main); padding: 10px 12px; border-radius: 6px; font-size: 0.9rem; outline: none; transition: border-color 0.15s; width: 100%; }
+        .input-field:focus { border-color: var(--accent-primary); }
         .input-row input[type="text"].input-field { flex: 2; min-width: 180px; }
         .input-row select.input-field, .input-row input[type="time"].input-field { flex: 1; min-width: 110px; cursor: pointer; }
-        select.input-field option { background: #1e1b4b; color: #fff; }
-        .btn-add { background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: opacity 0.2s, transform 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-add:active, .btn-add:hover { opacity: 0.9; transform: scale(1.01); }
+        select.input-field option { background: var(--panel-bg); color: var(--text-main); }
+        .btn-add { background: var(--accent-primary); color: var(--bg-main); border: none; padding: 10px 18px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.15s, opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-add:hover, .btn-add:active { opacity: 0.85; }
 
         /* --- PROGRESS BARS --- */
-        .pb-container { background: rgba(255,255,255,0.1); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; }
-        .pb-fill { background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); height: 100%; width: 0%; transition: width 0.25s ease-out; }
-        .daily-pb-wrap { margin-bottom: 20px; background: rgba(0,0,0,0.15); padding: 12px 15px; border-radius: 12px; border: 1px solid var(--glass-border); }
+        .pb-container { background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 4px; height: 6px; width: 100%; overflow: hidden; }
+        .pb-fill { background: var(--accent-primary); height: 100%; width: 0%; transition: width 0.25s ease-out; }
+        .daily-pb-wrap { margin-bottom: 16px; background: var(--input-bg); padding: 12px; border-radius: 6px; border: 1px solid var(--panel-border); }
 
         /* --- TASK LIST --- */
         .task-list { 
@@ -155,175 +163,163 @@
             overflow-y: auto; 
             display: flex; 
             flex-direction: column; 
-            gap: 12px; 
-            margin-top: 15px; 
-            padding-right: 5px; 
+            gap: 8px; 
+            margin-top: 12px; 
+            padding-right: 4px; 
             contain: layout style paint;
             -webkit-overflow-scrolling: touch;
         }
-        .task-list::-webkit-scrollbar { width: 5px; }
-        .task-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+        .task-list::-webkit-scrollbar { width: 4px; }
+        .task-list::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 4px; }
 
-        .task-item { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: transform 0.15s, background 0.15s; contain: content; }
-        .task-item:active, .task-item:hover { background: rgba(255, 255, 255, 0.08); }
+        .task-item { background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 6px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: border-color 0.15s, background 0.15s; contain: content; }
+        .task-item:hover, .task-item:active { border-color: var(--text-sub); }
         .task-left { display: flex; align-items: center; gap: 12px; flex: 1; }
-        .task-checkbox { width: 20px; height: 20px; accent-color: var(--accent-cyan); cursor: pointer; }
-        .task-info { display: flex; flex-direction: column; gap: 6px; width: 100%; cursor: pointer; padding: 5px 0;}
-        .task-text { font-size: 1.05rem; color: var(--text-main); font-weight: 500;}
+        .task-checkbox { width: 18px; height: 18px; accent-color: var(--accent-primary); cursor: pointer; }
+        .task-info { display: flex; flex-direction: column; gap: 4px; width: 100%; cursor: pointer; padding: 2px 0;}
+        .task-text { font-size: 0.95rem; color: var(--text-main); font-weight: 500;}
         .task-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         
-        .badge { font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
-        .badge-priority-high { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
-        .badge-priority-medium { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
-        .badge-priority-low { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .badge-subtask { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.4); }
-        .time-badge, .repeat-badge { font-size: 0.75rem; color: var(--text-sub); display: inline-flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 6px;}
+        .badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-priority-high { background: var(--panel-border); color: var(--text-main); border: 1px solid var(--text-sub); }
+        .badge-priority-medium { background: var(--input-bg); color: var(--text-sub); border: 1px solid var(--panel-border); }
+        .badge-priority-low { background: transparent; color: var(--text-sub); border: 1px solid var(--panel-border); }
+        .badge-subtask { background: var(--panel-bg); color: var(--text-main); border: 1px solid var(--panel-border); }
+        .time-badge, .repeat-badge { font-size: 0.75rem; color: var(--text-sub); display: inline-flex; align-items: center; gap: 4px; background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 2px 6px; border-radius: 4px;}
         .task-item.completed .task-text { text-decoration: line-through; color: var(--text-sub); }
-        .task-item.completed { opacity: 0.55; }
+        .task-item.completed { opacity: 0.45; }
         
         /* Action Buttons */
-        .task-actions { display: flex; gap: 8px; align-items: center; }
-        .btn-action { background: none; border: none; cursor: pointer; padding: 8px; font-size: 1.1rem; opacity: 0.8; transition: transform 0.15s, background 0.15s; border-radius: 8px; }
-        .btn-action.focus { color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); }
-        .btn-action.focus:hover, .btn-action.focus:active { opacity: 1; transform: scale(1.08); background: var(--accent-cyan); color: #000; }
-        .btn-action.delete { color: #f87171; background: rgba(248, 113, 113, 0.1); }
-        .btn-action.delete:hover, .btn-action.delete:active { opacity: 1; transform: scale(1.08); background: #f87171; color: #fff; }
+        .task-actions { display: flex; gap: 6px; align-items: center; }
+        .btn-action { background: none; border: none; cursor: pointer; padding: 6px 8px; font-size: 0.95rem; color: var(--text-sub); opacity: 0.8; transition: color 0.15s, opacity 0.15s, background 0.15s; border-radius: 4px; }
+        .btn-action.focus:hover, .btn-action.focus:active { opacity: 1; background: var(--panel-border); color: var(--text-main); }
+        .btn-action.delete:hover, .btn-action.delete:active { opacity: 1; background: var(--panel-border); color: #ef4444; }
 
         /* --- REAL-TIME STATUS --- */
-        .status-tracker { font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-        .st-future { background: rgba(255,255,255,0.1); color: var(--text-sub); }
-        .st-upcoming { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.4); }
-        .st-ongoing { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .st-late-5 { background: rgba(245, 158, 11, 0.2); color: #fde047; border: 1px solid rgba(245, 158, 11, 0.4); }
-        .st-late-10 { background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.4); }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-        .st-late-20 { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid #ef4444; animation: pulse-red 1.5s infinite; }
+        .status-tracker { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--panel-border); }
+        .st-future { background: var(--panel-bg); color: var(--text-sub); }
+        .st-upcoming { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
+        .st-ongoing { background: var(--panel-border); color: var(--text-main); border-color: var(--text-sub); }
+        .st-late-5 { background: var(--input-bg); color: var(--text-main); border-color: var(--panel-border); }
+        .st-late-10 { background: var(--panel-bg); color: var(--text-main); border-color: var(--panel-border); }
+        .st-late-20 { background: var(--panel-border); color: var(--text-main); border-color: var(--text-sub); }
 
         /* --- ANALYTICS SECTION --- */
-        .chart-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .chart-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text-sub); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: background 0.2s, color 0.2s; font-weight: 600;}
-        .chart-btn.active, .chart-btn:hover { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); }
-        .stats-grid { display: flex; gap: 10px; margin-bottom: 20px; }
-        .stat-box { flex: 1; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px 10px; text-align: center; }
-        .stat-box .s-val { font-size: 1.8rem; font-weight: 800; color: var(--accent-cyan); display: block; margin-bottom: 5px; }
-        .stat-box .s-lbl { font-size: 0.8rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px;}
-        .deep-analysis-box { background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 18px; margin-top: 20px; font-size: 0.95rem; line-height: 1.6; }
-        .deep-analysis-box h4 { margin-bottom: 12px; color: #d8b4fe; display: flex; align-items: center; gap: 8px; font-size: 1.05rem;}
-        .deep-analysis-box ul { list-style: none; display: flex; flex-direction: column; gap: 10px;}
-        .deep-analysis-box li { display: flex; gap: 10px; align-items: flex-start; }
-        .deep-analysis-box li i { margin-top: 4px; }
+        .chart-controls { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
+        .chart-btn { background: var(--input-bg); border: 1px solid var(--panel-border); color: var(--text-sub); padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600;}
+        .chart-btn.active, .chart-btn:hover { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
+        .stats-grid { display: flex; gap: 8px; margin-bottom: 16px; }
+        .stat-box { flex: 1; background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 6px; padding: 12px 8px; text-align: center; }
+        .stat-box .s-val { font-size: 1.5rem; font-weight: 800; color: var(--text-main); display: block; margin-bottom: 2px; }
+        .stat-box .s-lbl { font-size: 0.72rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px;}
+        .deep-analysis-box { background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 6px; padding: 14px; margin-top: 16px; font-size: 0.88rem; line-height: 1.5; }
+        .deep-analysis-box h4 { margin-bottom: 10px; color: var(--text-main); display: flex; align-items: center; gap: 8px; font-size: 0.95rem;}
+        .deep-analysis-box ul { list-style: none; display: flex; flex-direction: column; gap: 8px;}
+        .deep-analysis-box li { display: flex; gap: 8px; align-items: flex-start; }
+        .deep-analysis-box li i { margin-top: 3px; color: var(--accent-primary); }
 
         /* --- MODALS & TOASTS --- */
         .modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0, 0, 0, 0.7); 
-            backdrop-filter: blur(5px); 
-            -webkit-backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.75); 
             display: none; justify-content: center; align-items: center; 
             z-index: 1000; padding: 20px; opacity: 0; 
             transition: opacity 0.2s ease; 
         }
         .modal-overlay.show { display: flex; opacity: 1; will-change: opacity; }
         .modal-content { 
-            background: var(--bg-gradient); width: 100%; max-width: 480px; padding: 25px; 
-            border-radius: 20px; border: 1px solid var(--glass-border); 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5); 
-            transform: translateY(15px) translate3d(0,0,0); 
+            background: var(--panel-bg); width: 100%; max-width: 440px; padding: 20px; 
+            border-radius: 8px; border: 1px solid var(--panel-border); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); 
+            transform: translateY(10px) translate3d(0,0,0); 
             transition: transform 0.2s ease; 
             display: flex; flex-direction: column; 
         }
         .modal-overlay.show .modal-content { transform: translateY(0) translate3d(0,0,0); }
-        .modal-content h3 { color: #fff; margin-bottom: 15px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
-        .icon-picker-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 15px 0; max-height: 200px; overflow-y: auto; padding-right: 5px; -webkit-overflow-scrolling: touch; }
-        .icon-option { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 10px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; color: var(--text-main); cursor: pointer; transition: transform 0.15s, background 0.15s; }
-        .icon-option:hover, .icon-option:active { background: rgba(56, 189, 248, 0.2); transform: scale(0.95); }
-        .icon-option.active { background: var(--accent-cyan); color: #000; border-color: #fff; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn-cancel { background: transparent; border: 1px solid var(--glass-border); color: var(--text-main); padding: 10px 18px; border-radius: 8px; cursor: pointer; }
-        .subtask-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--glass-border); border-radius: 8px; margin-bottom: 8px; contain: content; }
+        .modal-content h3 { color: var(--text-main); margin-bottom: 12px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        .icon-picker-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 12px 0; max-height: 180px; overflow-y: auto; padding-right: 4px; -webkit-overflow-scrolling: touch; }
+        .icon-option { background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 6px; height: 40px; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; color: var(--text-main); cursor: pointer; transition: border-color 0.15s; }
+        .icon-option:hover, .icon-option:active { border-color: var(--accent-primary); }
+        .icon-option.active { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+        .btn-cancel { background: transparent; border: 1px solid var(--panel-border); color: var(--text-main); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+        .subtask-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 6px; margin-bottom: 6px; contain: content; }
         .subtask-item.done span { text-decoration: line-through; color: var(--text-sub); }
-        .empty-state { text-align: center; color: var(--text-sub); padding: 20px 0; font-size: 0.9rem; }
+        .empty-state { text-align: center; color: var(--text-sub); padding: 16px 0; font-size: 0.85rem; }
         
-        .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none;}
+        .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; pointer-events: none;}
         .toast { 
-            background: rgba(15, 23, 42, 0.95); border-left: 4px solid var(--accent-cyan); padding: 15px 20px; border-radius: 8px; color: white; min-width: 250px; 
+            background: var(--toast-bg); border: 1px solid var(--panel-border); border-left: 4px solid var(--accent-primary); padding: 12px 16px; border-radius: 6px; color: var(--text-main); min-width: 240px; 
             transform: translateX(120%) translate3d(0,0,0); 
-            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            display: flex; align-items: center; gap: 12px;
+            transition: transform 0.25s ease; 
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
         .toast.show { transform: translateX(0) translate3d(0,0,0); }
-        .toast-icon { font-size: 1.5rem; }
-        .toast.t-warning { border-left-color: #facc15; }
-        .toast.t-warning .toast-icon { color: #facc15; }
-        .toast.t-danger { border-left-color: #ef4444; }
-        .toast.t-danger .toast-icon { color: #ef4444; }
+        .toast-icon { font-size: 1.2rem; color: var(--accent-primary); }
 
         /* FOCUS MODE OVERLAY */
         .focus-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.98); 
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            background: var(--bg-main); 
             display: none; justify-content: center; align-items: center;
-            z-index: 9999; opacity: 0; transition: opacity 0.25s ease;
+            z-index: 9999; opacity: 0; transition: opacity 0.2s ease;
         }
         .focus-overlay.show { display: flex; opacity: 1; will-change: opacity; }
         .focus-close-btn {
             position: absolute; top: 20px; right: 20px;
-            background: rgba(255,255,255,0.1); border: none; color: var(--text-sub);
-            width: 44px; height: 44px; border-radius: 50%; font-size: 1.3rem;
-            cursor: pointer; transition: transform 0.15s, background 0.15s;
+            background: transparent; border: 1px solid var(--panel-border); color: var(--text-sub);
+            width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem;
+            cursor: pointer; transition: background 0.15s, color 0.15s;
         }
-        .focus-close-btn:hover, .focus-close-btn:active { color: #fff; background: #ef4444; transform: rotate(90deg); }
-        .focus-content { text-align: center; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 700px; padding: 20px;}
-        .focus-badge { background: rgba(56, 189, 248, 0.2); color: var(--accent-cyan); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-bottom: 20px; letter-spacing: 1px;}
-        #focus-task-name { color: #fff; font-size: 1.8rem; margin-bottom: 30px; font-weight: 700; line-height: 1.3;}
+        .focus-close-btn:hover, .focus-close-btn:active { color: var(--bg-main); background: var(--text-main); border-color: var(--text-main); }
+        .focus-content { text-align: center; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 600px; padding: 20px;}
+        .focus-badge { background: var(--panel-bg); color: var(--text-main); padding: 6px 14px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; margin-bottom: 16px; letter-spacing: 0.5px; border: 1px solid var(--panel-border);}
+        #focus-task-name { color: var(--text-main); font-size: 1.6rem; margin-bottom: 24px; font-weight: 700; line-height: 1.3;}
         .focus-timer-display {
-            font-size: 6rem; font-weight: 800; font-variant-numeric: tabular-nums;
-            background: linear-gradient(135deg, #38bdf8, #a855f7);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 30px; filter: drop-shadow(0 10px 20px rgba(168,85,247,0.3));
-            line-height: 1;
+            font-size: 5.5rem; font-weight: 800; font-variant-numeric: tabular-nums;
+            color: var(--text-main); margin-bottom: 24px; line-height: 1;
         }
-        .focus-time-options { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center;}
+        .focus-time-options { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center;}
         .f-opt-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            color: var(--text-sub); padding: 10px 20px; border-radius: 30px;
-            font-size: 0.9rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600;
+            background: var(--panel-bg); border: 1px solid var(--panel-border);
+            color: var(--text-sub); padding: 8px 16px; border-radius: 6px;
+            font-size: 0.85rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600;
         }
-        .f-opt-btn.active, .f-opt-btn:hover, .f-opt-btn:active { background: rgba(56,189,248,0.2); color: #fff; border-color: var(--accent-cyan); }
-        .focus-controls { display: flex; gap: 15px; }
+        .f-opt-btn.active, .f-opt-btn:hover, .f-opt-btn:active { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
+        .focus-controls { display: flex; gap: 12px; }
         .f-ctrl-btn {
-            border: none; padding: 16px 36px; border-radius: 40px; font-size: 1.1rem;
-            font-weight: 700; cursor: pointer; transition: transform 0.15s, background 0.15s; display: flex; align-items: center; gap: 10px;
+            border: none; padding: 14px 32px; border-radius: 6px; font-size: 1rem;
+            font-weight: 700; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 8px;
         }
-        .f-ctrl-btn.play { background: var(--text-main); color: #0f172a; box-shadow: 0 10px 20px rgba(255,255,255,0.2); }
-        .f-ctrl-btn.play:hover, .f-ctrl-btn.play:active { transform: scale(0.98); }
-        .f-ctrl-btn.stop { background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid var(--glass-border); }
-        .f-ctrl-btn.stop:hover, .f-ctrl-btn.stop:active { background: rgba(255,255,255,0.2); }
+        .f-ctrl-btn.play { background: var(--accent-primary); color: var(--bg-main); }
+        .f-ctrl-btn.play:hover, .f-ctrl-btn.play:active { opacity: 0.9; }
+        .f-ctrl-btn.stop { background: transparent; color: var(--text-main); border: 1px solid var(--panel-border); }
+        .f-ctrl-btn.stop:hover, .f-ctrl-btn.stop:active { background: var(--panel-border); }
 
         /* RESPONSIVE LAYOUT */
         @media (max-width: 850px) {
             body { padding: 12px; }
-            .main-wrapper { flex-direction: column; gap: 16px; }
-            .sidebar-left { width: 100%; position: static; gap: 14px; }
-            .cinematic-card { padding: 18px; border-radius: 16px; }
-            .focus-timer-display { font-size: 4.8rem; }
+            .main-wrapper { flex-direction: column; gap: 14px; }
+            .sidebar-left { width: 100%; position: static; gap: 12px; }
+            .fluent-card { padding: 16px; border-radius: 6px; }
+            .focus-timer-display { font-size: 4rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ĐĂNG NHẬP -->
+    <!-- USER LOGIN -->
     <div class="login-wrapper" id="login-wrapper">
-        <div class="cinematic-card">
+        <div class="fluent-card">
             <div class="login-header">
-                <i class="fa-solid fa-fingerprint"></i>
-                <h2>BẢO MẬT HỆ THỐNG</h2>
-                <p style="color: var(--text-sub); font-size: 0.9rem;">Vui lòng định danh để truy cập dữ liệu</p>
+                <i class="fa-solid fa-shield-halved"></i>
+                <h2>XÁC THỰC BẢO MẬT</h2>
+                <p style="color: var(--text-sub); font-size: 0.85rem;">Nhập danh tính để truy cập hệ thống</p>
             </div>
             <div class="input-form">
-                <input type="text" id="login-username" class="input-field" placeholder="Nhập tên của bạn (VD: Thu, Nam...)">
-                <button class="btn-add" style="margin-top: 10px;" onclick="handleLogin()">
+                <input type="text" id="login-username" class="input-field" placeholder="Nhập tên người dùng (VD: Thu, Nam...)">
+                <button class="btn-add" style="margin-top: 8px;" onclick="handleLogin()">
                     Đăng Nhập <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
             </div>
@@ -333,34 +329,43 @@
     <!-- MAIN APP STRUCTURE -->
     <div class="main-wrapper" id="main-wrapper">
         
-        <!-- SIDEBAR BÊN TRÁI -->
+        <!-- SIDEBAR -->
         <aside class="sidebar-left">
-            <!-- TÀI KHOẢN -->
-            <div class="cinematic-card user-panel">
-                <h2 id="welcome-title"><i class="fa-solid fa-hand-sparkles" style="color:#fcd34d;"></i> Xin chào!</h2>
-                <p>Hệ thống Quản lý & Hiệu suất</p>
-                <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Đăng xuất</button>
+            <!-- ACCOUNT PANEL -->
+            <div class="fluent-card user-panel">
+                <h2 id="welcome-title"><i class="fa-solid fa-circle-user" style="color: var(--accent-primary);"></i> Xin chào</h2>
+                <p>Hệ thống Quản lý Thời gian & Hiệu suất</p>
+                <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
             </div>
 
-            <!-- DANH SÁCH THẢ XUỐNG (DROPDOWN CHỌN CHỨC NĂNG) -->
-            <div class="cinematic-card dropdown-menu-card">
-                <div class="dropdown-label"><i class="fa-solid fa-bars-staggered"></i> Chọn Chức Năng</div>
+            <!-- NAVIGATION DROPDOWN -->
+            <div class="fluent-card dropdown-menu-card">
+                <div class="dropdown-label"><i class="fa-solid fa-sliders"></i> Chức Năng Hệ Thống</div>
                 <select id="function-dropdown" class="function-dropdown" onchange="switchFunctionView(this.value)">
-                    <option value="all">🌟 Tất cả chức năng</option>
-                    <option value="task-main-card" selected>📝 Danh sách Công việc</option>
-                    <option value="sug-card">🪄 Gợi ý Công việc nhanh</option>
-                    <option value="analytics-card">📊 Phân tích Hiệu suất</option>
+                    <option value="all">Tất cả chức năng</option>
+                    <option value="task-main-card" selected>Danh sách Công việc</option>
+                    <option value="sug-card">Gợi ý Công việc nhanh</option>
+                    <option value="analytics-card">Báo cáo Phân tích Hiệu suất</option>
                 </select>
             </div>
 
-            <!-- ĐỒNG HỒ -->
-            <div class="cinematic-card clock-card">
+            <!-- THEME SWITCHER DROPDOWN -->
+            <div class="fluent-card dropdown-menu-card">
+                <div class="dropdown-label"><i class="fa-solid fa-circle-half-stroke"></i> Giao Diện (Theme)</div>
+                <select id="theme-dropdown" class="function-dropdown" onchange="setSystemTheme(this.value)">
+                    <option value="dark" selected>Theme Tối (Black)</option>
+                    <option value="light">Theme Sáng (White)</option>
+                </select>
+            </div>
+
+            <!-- CLOCK PANEL -->
+            <div class="fluent-card clock-card">
                 <div class="clock-time" id="clock-time">00:00:00</div>
                 <div class="clock-date" id="clock-date">Đang tải...</div>
             </div>
 
-            <!-- BỘ CHỌN NGÀY LÀM VIỆC -->
-            <div class="cinematic-card" style="padding: 14px;">
+            <!-- DATE NAVIGATOR -->
+            <div class="fluent-card" style="padding: 12px;">
                 <div class="date-nav">
                     <button class="date-nav-btn" onclick="changeDate(-1)"><i class="fa-solid fa-chevron-left"></i> Trước</button>
                     <input type="date" id="current-date-picker" class="date-picker-input" onchange="onDateSelect(this.value)">
@@ -369,38 +374,38 @@
             </div>
         </aside>
 
-        <!-- WORKSPACE BÊN PHẢI -->
+        <!-- WORKSPACE -->
         <main class="workspace-right">
 
-            <!-- 1. GỢI Ý CÔNG VIỆC -->
-            <div class="cinematic-card" id="sug-card">
+            <!-- 1. TASK SUGGESTIONS -->
+            <div class="fluent-card" id="sug-card">
                 <div class="card-header" onclick="toggleCard('sug-card')">
-                    <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-purple);"></i> Gợi Ý Công Việc Nhanh</div>
+                    <div class="card-title"><i class="fa-solid fa-lightbulb" style="color: var(--accent-primary);"></i> Gợi Ý Công Việc Nhanh</div>
                     <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
                 </div>
                 <div class="card-body">
                     <div class="suggestion-header-actions">
-                        <span style="font-size: 0.85rem; color: var(--text-sub);">Bấm vào thẻ để điền nhanh công việc:</span>
+                        <span style="font-size: 0.8rem; color: var(--text-sub);">Bấm vào thẻ để nhập nhanh:</span>
                         <button class="btn-custom-sug" onclick="openIconModal()"><i class="fa-solid fa-plus"></i> Tạo gợi ý mới</button>
                     </div>
                     <div class="suggestion-grid" id="suggestion-grid"></div>
                 </div>
             </div>
 
-            <!-- 2. DANH SÁCH CÔNG VIỆC -->
-            <div class="cinematic-card" id="task-main-card">
+            <!-- 2. MAIN TASK MANAGEMENT -->
+            <div class="fluent-card" id="task-main-card">
                 <div class="card-header" onclick="toggleCard('task-main-card')">
-                    <div class="card-title"><i class="fa-solid fa-list-check" style="color: var(--accent-cyan);"></i> Danh Sách Công Việc</div>
+                    <div class="card-title"><i class="fa-solid fa-list-check" style="color: var(--accent-primary);"></i> Danh Sách Công Việc</div>
                     <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
                 </div>
                 
                 <div class="card-body">
                     <div class="daily-pb-wrap">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
-                            <span style="color: var(--text-main); font-weight: 500;">Tiến độ ngày đang chọn:</span>
-                            <span id="daily-progress-text" style="color: var(--accent-cyan); font-weight: 700;">0% (0/0)</span>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+                            <span style="color: var(--text-main); font-weight: 500;">Tiến độ hoàn thành:</span>
+                            <span id="daily-progress-text" style="color: var(--accent-primary); font-weight: 700;">0% (0/0)</span>
                         </div>
-                        <div class="pb-container" style="height: 8px;">
+                        <div class="pb-container">
                             <div class="pb-fill" id="daily-progress-bar"></div>
                         </div>
                     </div>
@@ -409,21 +414,21 @@
                         <input type="text" id="task-input" class="input-field" placeholder="Nhập tên công việc cần làm...">
                         <div class="input-row">
                             <select id="task-priority" class="input-field">
-                                <option value="high">🔴 Quan trọng & Gấp</option>
-                                <option value="medium" selected>🟡 Trung bình</option>
-                                <option value="low">🟢 Thấp / Thong thả</option>
+                                <option value="high">Mức độ: Quan trọng & Gấp</option>
+                                <option value="medium" selected>Mức độ: Trung bình</option>
+                                <option value="low">Mức độ: Thấp</option>
                             </select>
                             <select id="task-repeat" class="input-field">
-                                <option value="none" selected>🔄 Không lặp lại</option>
-                                <option value="daily">📅 Hằng ngày</option>
-                                <option value="weekly">📆 Hằng tuần</option>
+                                <option value="none" selected>Không lặp lại</option>
+                                <option value="daily">Lặp hằng ngày</option>
+                                <option value="weekly">Lặp hằng tuần</option>
                             </select>
                         </div>
                         <div class="input-row">
                             <input type="time" id="task-start-time" class="input-field" title="Giờ bắt đầu">
                             <span style="align-self: center; color: var(--text-sub); font-size: 0.85rem;">đến</span>
                             <input type="time" id="task-end-time" class="input-field" title="Giờ kết thúc">
-                            <button id="add-btn" class="btn-add" onclick="addTask()"><i class="fa-solid fa-plus"></i> Thêm</button>
+                            <button id="add-btn" class="btn-add" onclick="addTask()"><i class="fa-solid fa-plus"></i> Thêm công việc</button>
                         </div>
                     </div>
 
@@ -431,10 +436,10 @@
                 </div>
             </div>
 
-            <!-- 3. PHÂN TÍCH HIỆU SUẤT -->
-            <div class="cinematic-card" id="analytics-card">
+            <!-- 3. PERFORMANCE ANALYTICS -->
+            <div class="fluent-card" id="analytics-card">
                 <div class="card-header" onclick="toggleCard('analytics-card')">
-                    <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: #f43f5e;"></i> Phân Tích Hiệu Suất</div>
+                    <div class="card-title"><i class="fa-solid fa-chart-line" style="color: var(--accent-primary);"></i> Phân Tích Hiệu Suất Work</div>
                     <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
                 </div>
 
@@ -447,24 +452,24 @@
                     <div class="stats-grid">
                         <div class="stat-box">
                             <span class="s-val" id="kpi-total">0</span>
-                            <span class="s-lbl">Tổng Việc</span>
+                            <span class="s-lbl">Tổng Số Việc</span>
                         </div>
                         <div class="stat-box">
-                            <span class="s-val" id="kpi-done" style="color:#10b981;">0</span>
+                            <span class="s-val" id="kpi-done">0</span>
                             <span class="s-lbl">Đã Hoàn Thành</span>
                         </div>
                         <div class="stat-box">
-                            <span class="s-val" id="kpi-rate" style="color:#a855f7;">0%</span>
-                            <span class="s-lbl">Tỷ Lệ Chung</span>
+                            <span class="s-val" id="kpi-rate">0%</span>
+                            <span class="s-lbl">Tỷ Lệ Hoàn Thành</span>
                         </div>
                     </div>
 
-                    <div style="position: relative; height: 260px; width: 100%;">
+                    <div style="position: relative; height: 250px; width: 100%;">
                         <canvas id="performanceChart"></canvas>
                     </div>
 
                     <div class="deep-analysis-box">
-                        <h4><i class="fa-solid fa-brain"></i> Trợ Lý Phân Tích (AI Insight)</h4>
+                        <h4><i class="fa-solid fa-microchip"></i> Báo Cáo Trợ Lý AI (System Analysis)</h4>
                         <div id="deep-analysis-content"></div>
                     </div>
                 </div>
@@ -473,11 +478,11 @@
         </main>
     </div>
 
-    <!-- MODAL POPUPS -->
+    <!-- MODALS -->
     <div id="focus-mode-overlay" class="focus-overlay">
-        <button class="focus-close-btn" title="Thoát" onclick="closeFocusMode()"><i class="fa-solid fa-xmark"></i></button>
+        <button class="focus-close-btn" title="Đóng" onclick="closeFocusMode()"><i class="fa-solid fa-xmark"></i></button>
         <div class="focus-content">
-            <div class="focus-badge"><i class="fa-solid fa-crosshairs"></i> CHẾ ĐỘ TẬP TRUNG (POMODORO)</div>
+            <div class="focus-badge"><i class="fa-solid fa-stopwatch"></i> CHẾ ĐỘ TẬP TRUNG (POMODORO)</div>
             <h2 id="focus-task-name">Đang tải tên công việc...</h2>
             <div class="focus-timer-display" id="focus-timer-display">25:00</div>
             <div class="focus-time-options">
@@ -487,19 +492,19 @@
             </div>
             <div class="focus-controls">
                 <button class="f-ctrl-btn play" id="focus-play-btn" onclick="toggleFocusTimer()"><i class="fa-solid fa-play"></i> Bắt đầu</button>
-                <button class="f-ctrl-btn stop" onclick="resetFocusTimer()"><i class="fa-solid fa-rotate-right"></i> Làm lại</button>
+                <button class="f-ctrl-btn stop" onclick="resetFocusTimer()"><i class="fa-solid fa-rotate-right"></i> Thiết lập lại</button>
             </div>
         </div>
     </div>
 
     <div id="icon-modal" class="modal-overlay">
         <div class="modal-content">
-            <h3><i class="fa-solid fa-layer-group" style="color: var(--accent-cyan);"></i> Tạo Thẻ Gợi Ý Mới</h3>
-            <input type="text" id="modal-sug-text" class="input-field" placeholder="Ví dụ: Tập Yoga..." style="width: 100%; margin-bottom: 15px;">
+            <h3><i class="fa-solid fa-folder-plus" style="color: var(--accent-primary);"></i> Tạo Thẻ Gợi Ý Mới</h3>
+            <input type="text" id="modal-sug-text" class="input-field" placeholder="Ví dụ: Họp nhóm dự án..." style="width: 100%; margin-bottom: 12px;">
             <div class="icon-picker-grid" id="icon-picker-grid"></div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeModal('icon-modal')">Hủy bỏ</button>
-                <button class="btn-add" style="padding: 10px 20px;" onclick="saveCustomSuggestion()">Lưu Lại</button>
+                <button class="btn-add" style="padding: 8px 16px;" onclick="saveCustomSuggestion()">Lưu cấu hình</button>
             </div>
         </div>
     </div>
@@ -507,30 +512,30 @@
     <div id="task-detail-modal" class="modal-overlay">
         <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <h3 id="td-title" style="color: var(--accent-cyan); font-size: 1.3rem; margin-bottom: 5px;">Tên Công Việc</h3>
-                <i class="fa-solid fa-xmark" style="cursor:pointer; font-size: 1.2rem; color: var(--text-sub);" onclick="closeModal('task-detail-modal')"></i>
+                <h3 id="td-title" style="color: var(--accent-primary); font-size: 1.15rem; margin-bottom: 4px;">Chi Tiết Công Việc</h3>
+                <i class="fa-solid fa-xmark" style="cursor:pointer; font-size: 1.1rem; color: var(--text-sub);" onclick="closeModal('task-detail-modal')"></i>
             </div>
-            <div id="td-meta" style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;"></div>
+            <div id="td-meta" style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;"></div>
             
-            <div style="margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-sub);">
-                    <span>Tiến độ công việc này:</span>
-                    <span id="td-progress-text" style="color: #fff; font-weight: 600;">0%</span>
+            <div style="margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-sub); margin-bottom: 4px;">
+                    <span>Tiến độ các bước:</span>
+                    <span id="td-progress-text" style="color: var(--text-main); font-weight: 600;">0%</span>
                 </div>
                 <div class="pb-container">
                     <div class="pb-fill" id="td-progress-bar"></div>
                 </div>
             </div>
 
-            <hr style="border-color: var(--glass-border); margin-bottom: 15px;">
+            <hr style="border-color: var(--panel-border); margin-bottom: 12px;">
 
-            <div style="font-size: 0.95rem; font-weight: 600; margin-bottom: 10px;">Các bước nhỏ cần làm (Subtasks):</div>
+            <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--text-sub);">Các bước chi tiết (Subtasks):</div>
             <div class="input-form" style="flex-direction: row; gap: 8px;">
-                <input type="text" id="td-subtask-input" class="input-field" placeholder="Ví dụ: Bước 1..." style="flex: 1;">
+                <input type="text" id="td-subtask-input" class="input-field" placeholder="Thêm bước nhỏ..." style="flex: 1;">
                 <button class="btn-add" onclick="addSubtask()"><i class="fa-solid fa-plus"></i></button>
             </div>
 
-            <div id="td-subtask-list" style="margin-top: 15px; max-height: 250px; overflow-y: auto; padding-right: 5px; -webkit-overflow-scrolling: touch;"></div>
+            <div id="td-subtask-list" style="margin-top: 12px; max-height: 220px; overflow-y: auto; padding-right: 4px; -webkit-overflow-scrolling: touch;"></div>
         </div>
     </div>
 
@@ -544,11 +549,12 @@
         let selectedDateStr = new Date().toISOString().split('T')[0];
         let currentPeriod = 'week';
         let perfChart = null;
+        let currentTheme = 'dark';
         
         let alertedTasks = {}; 
         let currentDetailTaskId = null;
 
-        // BIẾN POMODORO & TIMER CONTROL
+        // POMODORO & TIMER CONTROL
         let focusInterval = null;
         let focusTotalTime = 25 * 60;
         let focusTimeLeft = 25 * 60;
@@ -558,23 +564,23 @@
         // DOM CACHE
         const domCache = {};
 
-        // Single Reusable Web Audio Context instance
+        // Audio Context Instance
         let audioCtxSingleton = null;
 
-        // GC Optimization - Reuse date object inside loop
+        // GC Optimization - Reuse static date object inside loop
         let staticLoopDate = new Date();
 
         const defaultSuggestions = [
-            { id: 1, text: 'Tập thể dục 30p', icon: 'fa-person-running', priority: 'high' },
-            { id: 2, text: 'Uống nước', icon: 'fa-glass-water', priority: 'medium' },
-            { id: 3, text: 'Đọc sách', icon: 'fa-book-open', priority: 'low' }
+            { id: 1, text: 'Tập thể dục 30 phút', icon: 'fa-person-running', priority: 'high' },
+            { id: 2, text: 'Uống đủ nước', icon: 'fa-glass-water', priority: 'medium' },
+            { id: 3, text: 'Đọc tài liệu chuyên môn', icon: 'fa-book-open', priority: 'low' }
         ];
 
         const iconLibrary = [
-            'fa-star', 'fa-heart', 'fa-person-running', 'fa-dumbbell', 'fa-person-swimming', 'fa-bicycle',
-            'fa-glass-water', 'fa-mug-hot', 'fa-utensils', 'fa-apple-whole', 'fa-burger', 'fa-book-open', 
-            'fa-laptop-code', 'fa-briefcase', 'fa-graduation-cap', 'fa-broom', 'fa-shower', 'fa-bed', 
-            'fa-cart-shopping', 'fa-music', 'fa-gamepad', 'fa-spa', 'fa-bolt', 'fa-fire'
+            'fa-star', 'fa-bookmark', 'fa-person-running', 'fa-dumbbell', 'fa-laptop-code', 'fa-briefcase',
+            'fa-glass-water', 'fa-mug-hot', 'fa-utensils', 'fa-file-lines', 'fa-building', 'fa-book-open', 
+            'fa-code', 'fa-user-tie', 'fa-graduation-cap', 'fa-wrench', 'fa-shower', 'fa-bed', 
+            'fa-cart-shopping', 'fa-list-check', 'fa-diagram-project', 'fa-spa', 'fa-bolt', 'fa-chart-pie'
         ];
         let selectedIcon = 'fa-star';
 
@@ -587,12 +593,27 @@
 
         /* KHỞI TẠO */
         window.onload = () => {
+            initTheme();
             checkAuth();
             startClockLoop();
             renderIconPicker();
         };
 
-        /* PAGE VISIBILITY API (Low-End PC & Mobile Energy Optimizer) */
+        /* THEME CONTROLLER */
+        function initTheme() {
+            const savedTheme = localStorage.getItem('app_theme') || 'dark';
+            setSystemTheme(savedTheme);
+        }
+
+        function setSystemTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('app_theme', theme);
+            getDom('theme-dropdown').value = theme;
+            if (perfChart) updateChartColors();
+        }
+
+        /* PAGE VISIBILITY API */
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 stopClockLoop();
@@ -620,7 +641,7 @@
             if (currentUser) {
                 getDom('login-wrapper').style.display = 'none';
                 getDom('main-wrapper').style.display = 'flex';
-                getDom('welcome-title').innerHTML = `<i class="fa-solid fa-hand-sparkles" style="color:#fcd34d;"></i> Xin chào, ${currentUser}!`;
+                getDom('welcome-title').innerHTML = `<i class="fa-solid fa-circle-user" style="color: var(--accent-primary);"></i> Xin chào, ${currentUser}`;
                 loadUserData();
                 getDom('current-date-picker').value = selectedDateStr;
                 renderSuggestions();
@@ -634,7 +655,7 @@
 
         function handleLogin() {
             const nameInput = getDom('login-username').value.trim();
-            if (!nameInput) { alert('Vui lòng nhập tên!'); return; }
+            if (!nameInput) { alert('Vui lòng nhập tên người dùng!'); return; }
             const formattedName = nameInput.charAt(0).toUpperCase() + nameInput.slice(1);
             localStorage.setItem('logged_in_user', formattedName);
             getDom('login-username').value = '';
@@ -642,14 +663,14 @@
         }
 
         function handleLogout() {
-            if(confirm("Bạn có muốn đăng xuất?")) {
+            if(confirm("Xác nhận đăng xuất khỏi hệ thống?")) {
                 localStorage.removeItem('logged_in_user');
                 alertedTasks = {};
                 checkAuth();
             }
         }
 
-        /* ĐIỀU HƯỚNG VIEW TỪ DROPDOWN SIDEBAR */
+        /* NAVIGATION DROPDOWN */
         function switchFunctionView(targetId) {
             const cards = ['sug-card', 'task-main-card', 'analytics-card'];
             cards.forEach(id => {
@@ -708,10 +729,10 @@
 
                 if (diffStart > 0) {
                     let minsToStart = Math.ceil(diffStart / 60000);
-                    if (minsToStart <= 15) html = `<div class="status-tracker st-upcoming"><i class="fa-solid fa-bell"></i> Sắp bắt đầu: ${minsToStart}p</div>`;
-                    else html = `<div class="status-tracker st-future"><i class="fa-solid fa-hourglass-start"></i> Bắt đầu sau: ${formatTimeText(minsToStart)}</div>`;
+                    if (minsToStart <= 15) html = `<div class="status-tracker st-upcoming"><i class="fa-solid fa-bell"></i> Sắp bắt đầu: ${minsToStart} phút</div>`;
+                    else html = `<div class="status-tracker st-future"><i class="fa-solid fa-clock"></i> Bắt đầu sau: ${formatTimeText(minsToStart)}</div>`;
                 } else if (diffStart <= 0 && (!endMs || diffEnd > 0)) {
-                    if (endMs) html = `<div class="status-tracker st-ongoing"><i class="fa-solid fa-spinner fa-spin"></i> Đang làm: Còn ${formatTimeText(Math.ceil(diffEnd / 60000))}</div>`;
+                    if (endMs) html = `<div class="status-tracker st-ongoing"><i class="fa-solid fa-spinner fa-spin"></i> Đang thực hiện: Còn ${formatTimeText(Math.ceil(diffEnd / 60000))}</div>`;
                     else html = calculateLateness(diffStart, task, "Bắt đầu");
                 } else if (endMs && diffEnd <= 0) {
                     html = calculateLateness(diffEnd, task, "Kết thúc");
@@ -726,20 +747,20 @@
         function calculateLateness(diffMs, task, typeStr) {
             let lateMins = Math.floor(Math.abs(diffMs) / 60000);
             if (lateMins >= 20) {
-                triggerToast(task.id, 'late20', `Báo Động: ${task.text}`, `Trễ ${typeStr.toLowerCase()} ${lateMins} phút!`, 'danger');
-                return `<div class="status-tracker st-late-20"><i class="fa-solid fa-triangle-exclamation"></i> Quá hạn ${lateMins} phút!</div>`;
+                triggerToast(task.id, 'late20', `Cảnh báo: ${task.text}`, `Đã quá hạn ${typeStr.toLowerCase()} ${lateMins} phút!`, 'danger');
+                return `<div class="status-tracker st-late-20"><i class="fa-solid fa-triangle-exclamation"></i> Quá hạn ${lateMins} phút</div>`;
             } else if (lateMins >= 10) {
-                triggerToast(task.id, 'late10', `Cảnh báo: ${task.text}`, `Muộn ${lateMins} phút!`, 'warning');
-                return `<div class="status-tracker st-late-10"><i class="fa-solid fa-circle-exclamation"></i> Muộn ${lateMins} phút</div>`;
+                triggerToast(task.id, 'late10', `Nhắc nhở: ${task.text}`, `Đã trễ ${lateMins} phút!`, 'warning');
+                return `<div class="status-tracker st-late-10"><i class="fa-solid fa-circle-exclamation"></i> Trễ ${lateMins} phút</div>`;
             } else if (lateMins >= 5) {
-                triggerToast(task.id, 'late5', `Nhắc nhở: ${task.text}`, `Trễ ${lateMins} phút.`, 'warning');
+                triggerToast(task.id, 'late5', `Thông báo: ${task.text}`, `Đã trễ ${lateMins} phút.`, 'warning');
                 return `<div class="status-tracker st-late-5"><i class="fa-regular fa-clock"></i> Trễ ${lateMins} phút</div>`;
-            } else return `<div class="status-tracker st-late-5"><i class="fa-solid fa-exclamation"></i> Vừa trễ hạn</div>`;
+            } else return `<div class="status-tracker st-late-5"><i class="fa-solid fa-exclamation"></i> Vừa quá thời gian</div>`;
         }
 
         function formatTimeText(totalMins) {
             if (totalMins < 60) return `${totalMins} phút`;
-            return `${Math.floor(totalMins / 60)}h ${totalMins % 60}p`;
+            return `${Math.floor(totalMins / 60)} giờ ${totalMins % 60} phút`;
         }
 
         /* TOAST NOTIFICATION */
@@ -750,8 +771,8 @@
         function showToast(title, message, type) {
             const container = getDom('toast-container');
             const toast = document.createElement('div'); toast.className = `toast t-${type}`;
-            let iconClass = type === 'warning' ? 'fa-exclamation-triangle' : (type === 'danger' ? 'fa-skull-crossbones' : 'fa-info-circle');
-            toast.innerHTML = `<div class="toast-icon"><i class="fa-solid ${iconClass}"></i></div><div class="toast-content"><h4>${title}</h4><p>${message}</p></div>`;
+            let iconClass = type === 'warning' ? 'fa-triangle-exclamation' : (type === 'danger' ? 'fa-circle-xmark' : 'fa-circle-info');
+            toast.innerHTML = `<div class="toast-icon"><i class="fa-solid ${iconClass}"></i></div><div class="toast-content"><h4 style="font-size:0.9rem; margin-bottom:2px;">${title}</h4><p style="font-size:0.8rem; opacity:0.9;">${message}</p></div>`;
             container.appendChild(toast);
             requestAnimationFrame(() => toast.classList.add('show'));
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 250); }, 5000);
@@ -769,7 +790,7 @@
         function openModal(id) { getDom(id).classList.add('show'); }
         function closeModal(id) { getDom(id).classList.remove('show'); }
 
-        /* GỢI Ý */
+        /* SUGGESTIONS */
         function renderSuggestions() {
             const grid = getDom('suggestion-grid');
             let htmlStr = '';
@@ -799,13 +820,13 @@
         function openIconModal() { getDom('modal-sug-text').value = ''; openModal('icon-modal'); }
         function saveCustomSuggestion() {
             const txt = getDom('modal-sug-text').value.trim();
-            if(!txt) return alert('Nhập tên!');
+            if(!txt) return alert('Vui lòng nhập tên gợi ý!');
             suggestions.push({id: Date.now(), text: txt, icon: selectedIcon, priority: 'medium'});
             saveUserData(); renderSuggestions(); closeModal('icon-modal');
         }
         function deleteSuggestion(id, e) { e.stopPropagation(); suggestions = suggestions.filter(s=>s.id!==id); saveUserData(); renderSuggestions(); }
 
-        /* CÔNG VIỆC */
+        /* TASK MANAGEMENT */
         getDom('task-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
 
         function addTask() {
@@ -871,11 +892,11 @@
                 else if(task.priority==='low'){ prioLbl='Thấp'; prioCls='badge-priority-low';}
                 
                 let timeHtml = task.startTime ? `<span class="time-badge"><i class="fa-regular fa-clock"></i> ${task.startTime} ${task.endTime ? '- '+task.endTime : ''}</span>` : '';
-                let repHtml = task.repeat!=='none' ? `<span class="repeat-badge"><i class="fa-solid fa-arrows-rotate"></i></span>` : '';
+                let repHtml = task.repeat!=='none' ? `<span class="repeat-badge"><i class="fa-solid fa-rotate"></i></span>` : '';
                 let subBadge = '';
                 if(task.subtasks && task.subtasks.length > 0) {
                     const doneSubs = task.subtasks.filter(s=>s.completed).length;
-                    subBadge = `<span class="badge badge-subtask"><i class="fa-solid fa-layer-group"></i> ${doneSubs}/${task.subtasks.length}</span>`;
+                    subBadge = `<span class="badge badge-subtask"><i class="fa-solid fa-list-check"></i> ${doneSubs}/${task.subtasks.length}</span>`;
                 }
 
                 listHtml += `
@@ -923,7 +944,7 @@
             let doneCount = 0;
 
             if(subs.length === 0) { 
-                list.innerHTML = `<div class="empty-state" style="font-size:0.85rem;">Chưa có bước nhỏ nào. Hãy thêm ở trên!</div>`; 
+                list.innerHTML = `<div class="empty-state">Chưa có bước thực hiện chi tiết.</div>`; 
             } else {
                 let htmlStr = '';
                 subs.forEach(sub => {
@@ -931,10 +952,10 @@
                     htmlStr += `
                         <div class="subtask-item ${sub.completed ? 'done' : ''}">
                             <div style="display:flex; align-items:center; gap: 10px; cursor:pointer;" onclick="toggleSubtask(${sub.id})">
-                                <input type="checkbox" style="width:16px; height:16px; accent-color: var(--accent-purple);" ${sub.completed ? 'checked' : ''}>
+                                <input type="checkbox" style="width:16px; height:16px; accent-color: var(--accent-primary);" ${sub.completed ? 'checked' : ''}>
                                 <span>${escapeHtml(sub.text)}</span>
                             </div>
-                            <i class="fa-solid fa-trash-can btn-delete" style="font-size:0.9rem; color:#ef4444; cursor:pointer;" onclick="deleteSubtask(${sub.id})"></i>
+                            <i class="fa-solid fa-trash-can btn-delete" style="font-size:0.85rem; color:#ef4444; cursor:pointer;" onclick="deleteSubtask(${sub.id})"></i>
                         </div>
                     `;
                 });
@@ -1000,13 +1021,9 @@
                 clearInterval(focusInterval);
                 isFocusRunning = false;
                 playBtn.innerHTML = '<i class="fa-solid fa-play"></i> Tiếp tục';
-                playBtn.style.background = 'var(--text-main)';
-                playBtn.style.color = '#0f172a';
             } else {
                 isFocusRunning = true;
                 playBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Tạm dừng';
-                playBtn.style.background = 'var(--accent-cyan)';
-                playBtn.style.color = '#fff';
                 
                 focusInterval = setInterval(() => {
                     focusTimeLeft--;
@@ -1015,10 +1032,8 @@
                         clearInterval(focusInterval);
                         isFocusRunning = false;
                         playBtn.innerHTML = '<i class="fa-solid fa-play"></i> Bắt đầu';
-                        playBtn.style.background = 'var(--text-main)';
-                        playBtn.style.color = '#0f172a';
                         playBeepSound();
-                        showToast('Hoàn thành!', 'Bạn đã hoàn thành phiên tập trung xuất sắc!', 'info');
+                        showToast('Hoàn thành', 'Bạn đã hoàn thành phiên tập trung.', 'info');
                     }
                 }, 1000);
             }
@@ -1030,7 +1045,7 @@
             updateFocusDisplay();
         }
 
-        // Web Audio Context - Safe for Low-End PC & Mobile
+        // Web Audio Context
         function playBeepSound() {
             try {
                 if (!audioCtxSingleton) {
@@ -1053,34 +1068,57 @@
             }
         }
 
-        /* BẢO CÁO PHÂN TÍCH CHART.JS */
+        /* CHART.JS ANALYTICS */
         function initChart() {
             const ctx = getDom('performanceChart').getContext('2d');
+            const isDark = currentTheme === 'dark';
+            
             perfChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: [],
                     datasets: [
-                        { type: 'line', label: 'Tỷ lệ %', data: [], borderColor: '#a855f7', backgroundColor: '#a855f7', yAxisID: 'y1', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
-                        { type: 'bar', label: 'Đã xong', data: [], backgroundColor: '#10b981', yAxisID: 'y' },
-                        { type: 'bar', label: 'Chưa xong', data: [], backgroundColor: '#ef4444', yAxisID: 'y' }
+                        { type: 'line', label: 'Tỷ lệ %', data: [], borderColor: isDark ? '#ffffff' : '#09090b', backgroundColor: isDark ? '#ffffff' : '#09090b', yAxisID: 'y1', tension: 0.2, fill: false, borderWidth: 2, pointRadius: 3 },
+                        { type: 'bar', label: 'Hoàn thành', data: [], backgroundColor: isDark ? '#71717a' : '#94a3b8', yAxisID: 'y' },
+                        { type: 'bar', label: 'Chưa xong', data: [], backgroundColor: isDark ? '#27272a' : '#cbd5e1', yAxisID: 'y' }
                     ]
                 },
                 options: {
                     responsive: true, 
                     maintainAspectRatio: false,
-                    resizeDelay: 200, // Prevents CPU spikes on low-end PC window resizing
-                    animation: { duration: 100 }, // Reduced CPU animation overhead
+                    resizeDelay: 200, 
+                    animation: { duration: 100 }, 
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        x: { stacked: true, ticks: { color: '#94a3b8' }, grid: { display: false } },
-                        y: { stacked: true, beginAtZero: true, ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y1: { position: 'right', beginAtZero: true, max: 100, ticks: { color: '#a855f7' }, grid: { drawOnChartArea: false } }
+                        x: { stacked: true, ticks: { color: isDark ? '#a1a1aa' : '#64748b' }, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, ticks: { color: isDark ? '#a1a1aa' : '#64748b', stepSize: 1 }, grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } },
+                        y1: { position: 'right', beginAtZero: true, max: 100, ticks: { color: isDark ? '#ffffff' : '#09090b' }, grid: { drawOnChartArea: false } }
                     },
-                    plugins: { legend: { labels: { color: '#f8fafc' } } }
+                    plugins: { legend: { labels: { color: isDark ? '#fafafa' : '#0f172a' } } }
                 }
             });
             updateChart();
+        }
+
+        function updateChartColors() {
+            if (!perfChart) return;
+            const isDark = currentTheme === 'dark';
+            const mainColor = isDark ? '#ffffff' : '#09090b';
+            const subColor = isDark ? '#a1a1aa' : '#64748b';
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+            perfChart.data.datasets[0].borderColor = mainColor;
+            perfChart.data.datasets[0].backgroundColor = mainColor;
+            perfChart.data.datasets[1].backgroundColor = isDark ? '#71717a' : '#94a3b8';
+            perfChart.data.datasets[2].backgroundColor = isDark ? '#27272a' : '#cbd5e1';
+
+            perfChart.options.scales.x.ticks.color = subColor;
+            perfChart.options.scales.y.ticks.color = subColor;
+            perfChart.options.scales.y.grid.color = gridColor;
+            perfChart.options.scales.y1.ticks.color = mainColor;
+            perfChart.options.plugins.legend.labels.color = isDark ? '#fafafa' : '#0f172a';
+
+            perfChart.update();
         }
 
         function switchChartPeriod(period, btn) {
@@ -1138,15 +1176,15 @@
 
             let analysisHtml = `<ul>`;
             if (tot === 0) {
-                analysisHtml += `<li><i class="fa-solid fa-moon" style="color:var(--text-sub);"></i> Chưa có dữ liệu lịch sử trong giai đoạn này. Hãy lên kế hoạch nhé!</li>`;
+                analysisHtml += `<li><i class="fa-solid fa-circle-info"></i> Chưa có dữ liệu ghi nhận trong giai đoạn này.</li>`;
             } else {
-                if (overallRate >= 80) analysisHtml += `<li><i class="fa-solid fa-award" style="color:#fde047;"></i> Bạn đang làm việc <b>Cực kỳ xuất sắc</b> với tỷ lệ hoàn thành lên tới ${overallRate}%. Hãy giữ vững phong độ!</li>`;
-                else if (overallRate >= 50) analysisHtml += `<li><i class="fa-solid fa-thumbs-up" style="color:var(--accent-cyan);"></i> Phong độ <b>Khá Tốt</b> (${overallRate}%). Thêm một chút tập trung nữa để bứt phá nhé.</li>`;
-                else analysisHtml += `<li><i class="fa-solid fa-triangle-exclamation" style="color:#fca5a5;"></i> Cảnh báo: Tỷ lệ hoàn thành đang <b>Khá Thấp</b> (${overallRate}%). Bạn có đang ôm đồm quá nhiều việc không?</li>`;
+                if (overallRate >= 80) analysisHtml += `<li><i class="fa-solid fa-chart-line"></i> Hiệu suất làm việc <b>Cực kỳ xuất sắc</b> với tỷ lệ hoàn thành ${overallRate}%.</li>`;
+                else if (overallRate >= 50) analysisHtml += `<li><i class="fa-solid fa-check"></i> Phong độ làm việc <b>Tốt</b> (${overallRate}%). Duy trì nhịp độ làm việc hiện tại.</li>`;
+                else analysisHtml += `<li><i class="fa-solid fa-triangle-exclamation"></i> Tỷ lệ hoàn thành công việc <b>Cần cải thiện</b> (${overallRate}%).</li>`;
 
-                if (bestDay.count > 0) analysisHtml += `<li><i class="fa-solid fa-fire" style="color:#fb923c;"></i> <b>Năng suất đỉnh cao:</b> Rơi vào ${bestDay.label} với ${bestDay.count} việc được xử lý gọn gàng.</li>`;
-                if (highMissed > 0) analysisHtml += `<li><i class="fa-solid fa-circle-exclamation" style="color:var(--priority-high);"></i> <b>Cần lưu ý:</b> Bạn đã bỏ lỡ ${highMissed} công việc gắn cờ "Quan trọng & Gấp". Hãy ưu tiên giải quyết chúng trước!</li>`;
-                else analysisHtml += `<li><i class="fa-solid fa-shield-check" style="color:var(--priority-low);"></i> <b>Kỷ luật tốt:</b> Bạn không bỏ sót bất kỳ công việc ưu tiên cao nào!</li>`;
+                if (bestDay.count > 0) analysisHtml += `<li><i class="fa-solid fa-bolt"></i> <b>Năng suất cao nhất:</b> Rơi vào ${bestDay.label} với ${bestDay.count} công việc được xử lý.</li>`;
+                if (highMissed > 0) analysisHtml += `<li><i class="fa-solid fa-circle-exclamation"></i> <b>Cần lưu ý:</b> Còn ${highMissed} công việc "Quan trọng & Gấp" chưa hoàn thành.</li>`;
+                else analysisHtml += `<li><i class="fa-solid fa-shield-halved"></i> <b>Kỷ luật tốt:</b> Đã xử lý tất cả công việc ưu tiên cao.</li>`;
             }
             analysisHtml += `</ul>`;
             getDom('deep-analysis-content').innerHTML = analysisHtml;
