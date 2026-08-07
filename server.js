@@ -13,7 +13,6 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Your Firebase web configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBf6TJtBGQ1CRI3VtCaLRdkencJxwq8SQw",
   authDomain: "sanglexd.firebaseapp.com",
@@ -24,7 +23,6 @@ const firebaseConfig = {
   measurementId: "G-2471QSQVZM"
 };
 
-// Initialize Firebase Services
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
@@ -44,14 +42,12 @@ const defaultSuggestions = [
     { id: 3, text: 'Đọc tài liệu chuyên môn', icon: 'fa-book-open', priority: 'low' }
 ];
 
-// Helper to convert plain username to an auth email format
 function usernameToEmail(username) {
     return `${username.trim().toLowerCase()}@app.local`;
 }
 
 /* --- REST API ENDPOINTS --- */
 
-// Firebase Authentication Login
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !username.trim() || !password) {
@@ -62,10 +58,7 @@ app.post('/api/login', async (req, res) => {
     const authEmail = usernameToEmail(cleanUsername);
 
     try {
-        // Authenticate using Firebase Auth
         await signInWithEmailAndPassword(auth, authEmail, password);
-
-        // Fetch user data from Firestore
         const userRef = doc(db, "users", cleanUsername);
         const userSnap = await getDoc(userRef);
 
@@ -89,7 +82,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Firebase Authentication Register
 app.post('/api/register', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !username.trim() || !password || password.length < 6) {
@@ -101,16 +93,13 @@ app.post('/api/register', async (req, res) => {
     const userRef = doc(db, "users", cleanUsername);
 
     try {
-        // Check if username already exists in Firestore
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
             return res.status(400).json({ error: 'Tên người dùng này đã được sử dụng!' });
         }
 
-        // Create Firebase Authentication Account
         await createUserWithEmailAndPassword(auth, authEmail, password);
 
-        // Save user record in Firestore
         const newUser = {
             username: cleanUsername,
             tasks: [],
@@ -136,7 +125,6 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Get user data
 app.get('/api/user/:username', async (req, res) => {
     const cleanUsername = req.params.username.trim().toLowerCase();
     const userRef = doc(db, "users", cleanUsername);
@@ -158,7 +146,6 @@ app.get('/api/user/:username', async (req, res) => {
     }
 });
 
-// Sync user state
 app.post('/api/sync', async (req, res) => {
     const { username, tasks, suggestions, theme } = req.body;
 
@@ -183,7 +170,6 @@ app.post('/api/sync', async (req, res) => {
     }
 });
 
-// Catch-all route to serve index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
