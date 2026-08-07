@@ -4,6 +4,11 @@ const cors = require('cors');
 const { initializeApp } = require('firebase/app');
 const { getAnalytics } = require('firebase/analytics');
 const { getFirestore, doc, getDoc, setDoc, updateDoc } = require('firebase/firestore');
+const { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword 
+} = require('firebase/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,21 +24,19 @@ const firebaseConfig = {
   measurementId: "G-2471QSQVZM"
 };
 
-// Initialize Firebase App
+// Initialize Firebase Services
 const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
 
-// Initialize Firebase Analytics (Browser environment check)
 let analytics;
 if (typeof window !== 'undefined') {
   analytics = getAnalytics(firebaseApp);
 }
 
-// Initialize Cloud Firestore
-const db = getFirestore(firebaseApp);
-
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname)); // Serves index.html from root folder
+app.use(express.static(__dirname));
 
 const defaultSuggestions = [
     { id: 1, text: 'Tập thể dục 30 phút', icon: 'fa-person-running', priority: 'high' },
@@ -41,38 +44,95 @@ const defaultSuggestions = [
     { id: 3, text: 'Đọc tài liệu chuyên môn', icon: 'fa-book-open', priority: 'low' }
 ];
 
+// Helper to convert plain username to an auth email format
+function usernameToEmail(username) {
+    return `${username.trim().toLowerCase()}@app.local`;
+}
+
 /* --- REST API ENDPOINTS --- */
 
-// Login or auto-create account by Username
+// Firebase Authentication Login
 app.post('/api/login', async (req, res) => {
-    const { username } = req.body;
-    if (!username || !username.trim()) {
-        return res.status(400).json({ error: 'Username is required' });
+    const { username, password } = req.body;
+    if (!username || !username.trim() || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
     }
 
     const cleanUsername = username.trim().toLowerCase();
-    const userRef = doc(db, "users", cleanUsername);
+    const authEmail = usernameToEmail(cleanUsername);
 
     try {
+        // Authenticate using Firebase Auth
+        await signInWithEmailAndPassword(auth, authEmail, password);
+
+        // Fetch user data from Firestore
+        const userRef = doc(db, "users", cleanUsername);
         const userSnap = await getDoc(userRef);
 
         if (userSnap.exists()) {
-            // Return existing user data
-            return res.json(userSnap.data());
+            const userData = userSnap.data();
+            return res.json({
+                username: userData.username,
+                tasks: userData.tasks || [],
+                suggestions: userData.suggestions || defaultSuggestions,
+                theme: userData.theme || 'dark'
+            });
         } else {
-            // Register new user
-            const newUser = {
-                username: cleanUsername,
-                tasks: [],
-                suggestions: defaultSuggestions,
-                theme: 'dark'
-            };
-            await setDoc(userRef, newUser);
-            return res.json(newUser);
+            return res.status(404).json({ error: 'Dữ liệu tài khoản không tồn tại!' });
         }
     } catch (err) {
-        console.error("Firestore Login Error:", err);
-        res.status(500).json({ error: 'Database error' });
+        console.error("Firebase Auth Login Error:", err.code);
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+            return res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng!' });
+        }
+        res.status(500).json({ error: 'Đăng nhập thất bại. Vui lòng thử lại!' });
+    }
+});
+
+// Firebase Authentication Register
+app.post('/api/register', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !username.trim() || !password || password.length < 6) {
+        return res.status(400).json({ error: 'Tên người dùng và mật khẩu (tối thiểu 6 ký tự) là bắt buộc!' });
+    }
+
+    const cleanUsername = username.trim().toLowerCase();
+    const authEmail = usernameToEmail(cleanUsername);
+    const userRef = doc(db, "users", cleanUsername);
+
+    try {
+        // Check if username already exists in Firestore
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            return res.status(400).json({ error: 'Tên người dùng này đã được sử dụng!' });
+        }
+
+        // Create Firebase Authentication Account
+        await createUserWithEmailAndPassword(auth, authEmail, password);
+
+        // Save user record in Firestore
+        const newUser = {
+            username: cleanUsername,
+            tasks: [],
+            suggestions: defaultSuggestions,
+            theme: 'dark',
+            createdAt: new Date().toISOString()
+        };
+
+        await setDoc(userRef, newUser);
+
+        return res.json({
+            username: cleanUsername,
+            tasks: [],
+            suggestions: defaultSuggestions,
+            theme: 'dark'
+        });
+    } catch (err) {
+        console.error("Firebase Auth Register Error:", err.code);
+        if (err.code === 'auth/email-already-in-use') {
+            return res.status(400).json({ error: 'Tên người dùng đã tồn tại!' });
+        }
+        res.status(500).json({ error: 'Tạo tài khoản thất bại. Vui lòng thử lại!' });
     }
 });
 
@@ -86,13 +146,19 @@ app.get('/api/user/:username', async (req, res) => {
         if (!userSnap.exists()) {
             return res.status(404).json({ error: 'User not found' });
         }
-        res.json(userSnap.data());
+        const userData = userSnap.data();
+        res.json({
+            username: userData.username,
+            tasks: userData.tasks || [],
+            suggestions: userData.suggestions || defaultSuggestions,
+            theme: userData.theme || 'dark'
+        });
     } catch (err) {
         res.status(500).json({ error: 'Database error' });
     }
 });
 
-// Sync/Save user state
+// Sync user state
 app.post('/api/sync', async (req, res) => {
     const { username, tasks, suggestions, theme } = req.body;
 
