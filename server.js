@@ -8,7 +8,7 @@ const { getFirestore, doc, getDoc, setDoc, updateDoc } = require('firebase/fires
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Your web app's Firebase configuration
+// Your Firebase web configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBf6TJtBGQ1CRI3VtCaLRdkencJxwq8SQw",
   authDomain: "sanglexd.firebaseapp.com",
@@ -22,18 +22,18 @@ const firebaseConfig = {
 // Initialize Firebase App
 const firebaseApp = initializeApp(firebaseConfig);
 
-// Initialize Firebase Analytics (Analytics is client-side/browser safe)
+// Initialize Firebase Analytics (Browser environment check)
 let analytics;
 if (typeof window !== 'undefined') {
   analytics = getAnalytics(firebaseApp);
 }
 
-// Initialize Firestore
+// Initialize Cloud Firestore
 const db = getFirestore(firebaseApp);
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname)); // Serves index.html from root
+app.use(express.static(__dirname)); // Serves index.html from root folder
 
 const defaultSuggestions = [
     { id: 1, text: 'Tập thể dục 30 phút', icon: 'fa-person-running', priority: 'high' },
