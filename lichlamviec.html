@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Công Việc & Hiệu Suất Thông Minh</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --accent-cyan: #38bdf8;
+            --accent-purple: #a855f7;
+            --priority-high: #ef4444;
+            --priority-medium: #f59e0b;
+            --priority-low: #10b981;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg-gradient); background-attachment: fixed; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 25px 15px; color: var(--text-main); }
+
+        /* --- WRAPPERS --- */
+        .login-wrapper { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.6s ease; }
+        .main-wrapper { width: 100%; max-width: 680px; display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.6s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- CINEMATIC CARD BASE --- */
+        .cinematic-card { background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 22px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; }
+        .cinematic-card:hover { border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.15); }
+
+        /* --- WEB HEADER --- */
+        .site-header { text-align: center; padding: 10px 0; position: relative; }
+        .site-header h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: 1px; background: linear-gradient(90deg, #38bdf8, #a855f7, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
+        .site-header p { font-size: 0.9rem; color: var(--text-sub); }
+        .btn-logout { position: absolute; top: 10px; right: 0; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.3s; }
+        .btn-logout:hover { background: #ef4444; color: #fff; }
+
+        /* --- LOGIN SCREEN --- */
+        .login-header { text-align: center; margin-bottom: 25px; }
+        .login-header i { font-size: 2.5rem; color: var(--accent-purple); margin-bottom: 10px; }
+
+        /* --- ACCORDION --- */
+        .card-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .card-title { font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 12px; background: linear-gradient(90deg, #ffffff, var(--accent-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .toggle-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: center; color: var(--text-sub); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .cinematic-card.collapsed .toggle-icon { transform: rotate(-90deg); }
+        .card-body { max-height: 1800px; opacity: 1; margin-top: 18px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .cinematic-card.collapsed .card-body { max-height: 0; opacity: 0; margin-top: 0; pointer-events: none; }
+
+        /* --- CLOCK CARD --- */
+        .clock-card { background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%); border: 1px solid rgba(56, 189, 248, 0.2); text-align: center; padding: 18px; }
+        .clock-time { font-size: 2.6rem; font-weight: 700; letter-spacing: 2px; background: linear-gradient(90deg, #38bdf8, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 25px rgba(56, 189, 248, 0.3); font-variant-numeric: tabular-nums; }
+        .clock-date { color: var(--text-sub); font-size: 0.9rem; margin-top: 4px; }
+
+        /* --- DATE NAVIGATOR --- */
+        .date-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 15px; background: rgba(0, 0, 0, 0.2); padding: 10px 14px; border-radius: 14px; border: 1px solid var(--glass-border); }
+        .date-nav-btn { background: rgba(255, 255, 255, 0.08); border: none; color: var(--text-main); padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; }
+        .date-nav-btn:hover { background: var(--accent-purple); }
+        .date-picker-input { background: transparent; border: none; color: var(--accent-cyan); font-weight: 700; font-size: 1rem; cursor: pointer; outline: none; text-align: center; }
+
+        /* --- CHIPS & FORMS --- */
+        .suggestion-header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .suggestion-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+        .sug-chip { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); padding: 10px 12px; border-radius: 12px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; transition: all 0.3s ease; }
+        .sug-chip:hover { background: rgba(168, 85, 247, 0.15); border-color: var(--accent-purple); transform: translateY(-2px); }
+        .sug-chip-del { color: #ef4444; font-size: 0.8rem; opacity: 0.5; padding: 2px 4px; transition: opacity 0.2s; }
+        .sug-chip-del:hover { opacity: 1; }
+        .btn-custom-sug { background: rgba(56, 189, 248, 0.15); border: 1px dashed var(--accent-cyan); color: var(--accent-cyan); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s; }
+        
+        .input-form { display: flex; flex-direction: column; gap: 12px; }
+        .input-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .input-field { background: rgba(0, 0, 0, 0.25); border: 1px solid var(--glass-border); color: var(--text-main); padding: 12px 14px; border-radius: 10px; font-size: 0.95rem; outline: none; transition: all 0.3s; width: 100%; }
+        .input-field:focus { border-color: var(--accent-cyan); box-shadow: 0 0 12px rgba(56, 189, 248, 0.2); }
+        .input-row input[type="text"].input-field { flex: 2; min-width: 200px; }
+        .input-row select.input-field, .input-row input[type="time"].input-field { flex: 1; min-width: 120px; cursor: pointer; }
+        select.input-field option { background: #1e1b4b; color: #fff; }
+        .btn-add { background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-add:hover { opacity: 0.9; transform: scale(1.02); box-shadow: 0 5px 15px rgba(168, 85, 247, 0.3); }
+
+        /* --- PROGRESS BARS --- */
+        .pb-container { background: rgba(255,255,255,0.1); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; }
+        .pb-fill { background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); height: 100%; width: 0%; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 0 10px var(--accent-cyan); }
+        .daily-pb-wrap { margin-bottom: 20px; background: rgba(0,0,0,0.15); padding: 12px 15px; border-radius: 12px; border: 1px solid var(--glass-border); }
+
+        /* --- TASK LIST --- */
+        .task-list { list-style: none; max-height: 450px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-top: 15px; padding-right: 5px;}
+        .task-list::-webkit-scrollbar { width: 5px; }
+        .task-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+
+        .task-item { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.3s; }
+        .task-item:hover { background: rgba(255, 255, 255, 0.08); transform: translateX(4px); }
+        .task-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+        .task-checkbox { width: 18px; height: 18px; accent-color: var(--accent-cyan); cursor: pointer; }
+        .task-info { display: flex; flex-direction: column; gap: 6px; width: 100%; cursor: pointer; padding: 5px 0;}
+        .task-text { font-size: 1.05rem; color: var(--text-main); font-weight: 500;}
+        .task-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        
+        .badge { font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
+        .badge-priority-high { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .badge-priority-medium { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .badge-priority-low { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .badge-subtask { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.4); }
+        .time-badge, .repeat-badge { font-size: 0.75rem; color: var(--text-sub); display: inline-flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 6px;}
+        .task-item.completed .task-text { text-decoration: line-through; color: var(--text-sub); }
+        .task-item.completed { opacity: 0.55; }
+        
+        /* Action Buttons in Task List */
+        .task-actions { display: flex; gap: 8px; align-items: center; }
+        .btn-action { background: none; border: none; cursor: pointer; padding: 8px; font-size: 1.1rem; opacity: 0.7; transition: all 0.2s; border-radius: 8px; }
+        .btn-action.focus { color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); }
+        .btn-action.focus:hover { opacity: 1; transform: scale(1.1); background: var(--accent-cyan); color: #000; box-shadow: 0 0 10px var(--accent-cyan);}
+        .btn-action.delete { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+        .btn-action.delete:hover { opacity: 1; transform: scale(1.1); background: #f87171; color: #fff; }
+
+        /* --- REAL-TIME STATUS --- */
+        .status-tracker { font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s;}
+        .st-future { background: rgba(255,255,255,0.1); color: var(--text-sub); }
+        .st-upcoming { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.4); }
+        .st-ongoing { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .st-late-5 { background: rgba(245, 158, 11, 0.2); color: #fde047; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .st-late-10 { background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.4); }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .st-late-20 { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid #ef4444; animation: pulse-red 1.5s infinite; }
+
+        /* --- ANALYTICS SECTION --- */
+        .chart-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .chart-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text-sub); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: all 0.3s; font-weight: 600;}
+        .chart-btn.active, .chart-btn:hover { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); }
+        .stats-grid { display: flex; gap: 10px; margin-bottom: 20px; }
+        .stat-box { flex: 1; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px 10px; text-align: center; }
+        .stat-box .s-val { font-size: 1.8rem; font-weight: 800; color: var(--accent-cyan); display: block; margin-bottom: 5px; }
+        .stat-box .s-lbl { font-size: 0.8rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px;}
+        .deep-analysis-box { background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 18px; margin-top: 20px; font-size: 0.95rem; line-height: 1.6; }
+        .deep-analysis-box h4 { margin-bottom: 12px; color: #d8b4fe; display: flex; align-items: center; gap: 8px; font-size: 1.05rem;}
+        .deep-analysis-box ul { list-style: none; display: flex; flex-direction: column; gap: 10px;}
+        .deep-analysis-box li { display: flex; gap: 10px; align-items: flex-start; }
+        .deep-analysis-box li i { margin-top: 4px; }
+
+        /* --- MODALS & TOASTS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-content { background: var(--bg-gradient); width: 100%; max-width: 480px; padding: 25px; border-radius: 20px; border: 1px solid var(--glass-border); box-shadow: 0 25px 50px rgba(0,0,0,0.5); transform: translateY(20px); transition: transform 0.3s ease; display: flex; flex-direction: column; }
+        .modal-overlay.show .modal-content { transform: translateY(0); }
+        .modal-content h3 { color: #fff; margin-bottom: 15px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .icon-picker-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 15px 0; max-height: 200px; overflow-y: auto; padding-right: 5px; }
+        .icon-option { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 10px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; color: var(--text-main); cursor: pointer; transition: all 0.2s; }
+        .icon-option:hover { background: rgba(56, 189, 248, 0.2); transform: scale(1.1); }
+        .icon-option.active { background: var(--accent-cyan); color: #000; border-color: #fff; box-shadow: 0 0 10px var(--accent-cyan); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-cancel { background: transparent; border: 1px solid var(--glass-border); color: var(--text-main); padding: 10px 18px; border-radius: 8px; cursor: pointer; }
+        .subtask-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--glass-border); border-radius: 8px; margin-bottom: 8px;}
+        .subtask-item.done span { text-decoration: line-through; color: var(--text-sub); }
+        .empty-state { text-align: center; color: var(--text-sub); padding: 20px 0; font-size: 0.9rem; }
+        
+        .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none;}
+        .toast { background: rgba(15, 23, 42, 0.9); border-left: 4px solid var(--accent-cyan); padding: 15px 20px; border-radius: 8px; color: white; min-width: 250px; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px;}
+        .toast.show { transform: translateX(0); }
+        .toast-icon { font-size: 1.5rem; }
+        .toast.t-warning { border-left-color: #facc15; }
+        .toast.t-warning .toast-icon { color: #facc15; }
+        .toast.t-danger { border-left-color: #ef4444; }
+        .toast.t-danger .toast-icon { color: #ef4444; }
+
+        /* ================= FOCUS MODE OVERLAY (MỚI) ================= */
+        .focus-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.98); 
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 9999; opacity: 0; transition: opacity 0.5s ease;
+        }
+        .focus-overlay.show { display: flex; opacity: 1; }
+        .focus-close-btn {
+            position: absolute; top: 30px; right: 40px;
+            background: rgba(255,255,255,0.1); border: none; color: var(--text-sub);
+            width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem;
+            cursor: pointer; transition: 0.3s;
+        }
+        .focus-close-btn:hover { color: #fff; background: #ef4444; transform: rotate(90deg); }
+        .focus-content { text-align: center; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 700px; padding: 20px;}
+        
+        .focus-badge { background: rgba(56, 189, 248, 0.2); color: var(--accent-cyan); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-bottom: 20px; letter-spacing: 1px;}
+        #focus-task-name { color: #fff; font-size: 2.2rem; margin-bottom: 40px; font-weight: 700; line-height: 1.4;}
+        
+        .focus-timer-display {
+            font-size: 9rem; font-weight: 800; font-variant-numeric: tabular-nums;
+            background: linear-gradient(135deg, #38bdf8, #a855f7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 40px; filter: drop-shadow(0 10px 20px rgba(168,85,247,0.3));
+            line-height: 1;
+        }
+        
+        .focus-time-options { display: flex; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center;}
+        .f-opt-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            color: var(--text-sub); padding: 10px 25px; border-radius: 30px;
+            font-size: 1rem; cursor: pointer; transition: 0.3s; font-weight: 600;
+        }
+        .f-opt-btn.active, .f-opt-btn:hover { background: rgba(56,189,248,0.2); color: #fff; border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(56,189,248,0.3);}
+        
+        .focus-controls { display: flex; gap: 20px; }
+        .f-ctrl-btn {
+            border: none; padding: 18px 45px; border-radius: 40px; font-size: 1.2rem;
+            font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px;
+        }
+        .f-ctrl-btn.play { background: var(--text-main); color: #0f172a; box-shadow: 0 10px 20px rgba(255,255,255,0.2); }
+        .f-ctrl-btn.play:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(255,255,255,0.4); }
+        .f-ctrl-btn.stop { background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid var(--glass-border); }
+        .f-ctrl-btn.stop:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body>
+
+    <div class="login-wrapper" id="login-wrapper">
+        <div class="cinematic-card">
+            <div class="login-header">
+                <i class="fa-solid fa-fingerprint"></i>
+                <h2>BẢO MẬT HỆ THỐNG</h2>
+                <p style="color: var(--text-sub); font-size: 0.9rem;">Vui lòng định danh để truy cập dữ liệu</p>
+            </div>
+            <div class="input-form">
+                <input type="text" id="login-username" class="input-field" placeholder="Nhập tên của bạn (VD: Thu, Nam...)">
+                <button class="btn-add" style="margin-top: 10px;" onclick="handleLogin()">
+                    Đăng Nhập <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-wrapper" id="main-wrapper">
+        <header class="site-header">
+            <h1 id="welcome-title"><i class="fa-solid fa-chart-line"></i> Xin chào!</h1>
+            <p>Hệ thống Quản lý Thời gian & Đánh giá Hiệu suất</p>
+            <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Thoát</button>
+        </header>
+
+        <div class="cinematic-card clock-card">
+            <div class="clock-time" id="clock-time">00:00:00</div>
+            <div class="clock-date" id="clock-date">Đang tải...</div>
+        </div>
+
+        <div class="cinematic-card" id="sug-card">
+            <div class="card-header" onclick="toggleCard('sug-card')">
+                <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-purple);"></i> Gợi Ý Công Việc</div>
+                <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
+            </div>
+            <div class="card-body">
+                <div class="suggestion-header-actions">
+                    <span style="font-size: 0.85rem; color: var(--text-sub);">Bấm vào thẻ để điền nhanh:</span>
+                    <button class="btn-custom-sug" onclick="openIconModal()"><i class="fa-solid fa-plus"></i> Tạo gợi ý mới</button>
+                </div>
+                <div class="suggestion-grid" id="suggestion-grid"></div>
+            </div>
+        </div>
+
+        <div class="cinematic-card" id="task-main-card">
+            <div class="card-header" onclick="toggleCard('task-main-card')">
+                <div class="card-title"><i class="fa-solid fa-list-check" style="color: var(--accent-cyan);"></i> Danh Sách Công Việc</div>
+                <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
+            </div>
+            
+            <div class="card-body">
+                <div class="date-nav">
+                    <button class="date-nav-btn" onclick="changeDate(-1)"><i class="fa-solid fa-chevron-left"></i> Hôm trước</button>
+                    <input type="date" id="current-date-picker" class="date-picker-input" onchange="onDateSelect(this.value)">
+                    <button class="date-nav-btn" onclick="changeDate(1)">Hôm sau <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+
+                <div class="daily-pb-wrap">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
+                        <span style="color: var(--text-main); font-weight: 500;">Tiến độ hôm nay:</span>
+                        <span id="daily-progress-text" style="color: var(--accent-cyan); font-weight: 700;">0% (0/0)</span>
+                    </div>
+                    <div class="pb-container" style="height: 8px;">
+                        <div class="pb-fill" id="daily-progress-bar"></div>
+                    </div>
+                </div>
+
+                <div class="input-form">
+                    <input type="text" id="task-input" class="input-field" placeholder="Nhập tên công việc lớn...">
+                    <div class="input-row">
+                        <select id="task-priority" class="input-field">
+                            <option value="high">🔴 Quan trọng & Gấp</option>
+                            <option value="medium" selected>🟡 Trung bình</option>
+                            <option value="low">🟢 Thấp / Thong thả</option>
+                        </select>
+                        <select id="task-repeat" class="input-field">
+                            <option value="none" selected>🔄 Không lặp lại</option>
+                            <option value="daily">📅 Hằng ngày</option>
+                            <option value="weekly">📆 Hằng tuần</option>
+                        </select>
+                    </div>
+                    <div class="input-row">
+                        <input type="time" id="task-start-time" class="input-field" title="Giờ bắt đầu">
+                        <span style="align-self: center; color: var(--text-sub); font-size: 0.85rem;">đến</span>
+                        <input type="time" id="task-end-time" class="input-field" title="Giờ kết thúc">
+                        <button id="add-btn" class="btn-add" onclick="addTask()"><i class="fa-solid fa-plus"></i> Thêm</button>
+                    </div>
+                </div>
+
+                <ul class="task-list" id="task-list"></ul>
+            </div>
+        </div>
+
+        <div class="cinematic-card" id="analytics-card">
+            <div class="card-header" onclick="toggleCard('analytics-card')">
+                <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: #f43f5e;"></i> Phân Tích Hiệu Suất</div>
+                <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
+            </div>
+
+            <div class="card-body">
+                <div class="chart-controls">
+                    <button class="chart-btn active" onclick="switchChartPeriod('week', this)">7 Ngày Qua</button>
+                    <button class="chart-btn" onclick="switchChartPeriod('month', this)">4 Tuần Qua</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="s-val" id="kpi-total">0</span>
+                        <span class="s-lbl">Tổng Số Việc</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="s-val" id="kpi-done" style="color:#10b981;">0</span>
+                        <span class="s-lbl">Đã Hoàn Thành</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="s-val" id="kpi-rate" style="color:#a855f7;">0%</span>
+                        <span class="s-lbl">Tỷ Lệ Chung</span>
+                    </div>
+                </div>
+
+                <div style="position: relative; height: 260px; width: 100%;">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+
+                <div class="deep-analysis-box">
+                    <h4><i class="fa-solid fa-brain"></i> Trợ Lý Phân Tích (AI Insight)</h4>
+                    <div id="deep-analysis-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="focus-mode-overlay" class="focus-overlay">
+        <button class="focus-close-btn" title="Thoát" onclick="closeFocusMode()"><i class="fa-solid fa-xmark"></i></button>
+        
+        <div class="focus-content">
+            <div class="focus-badge"><i class="fa-solid fa-crosshairs"></i> CHẾ ĐỘ TẬP TRUNG (POMODORO)</div>
+            <h2 id="focus-task-name">Đang tải tên công việc...</h2>
+            
+            <div class="focus-timer-display" id="focus-timer-display">25:00</div>
+            
+            <div class="focus-time-options">
+                <button class="f-opt-btn" onclick="setFocusTime(15, this)">15 Phút</button>
+                <button class="f-opt-btn active" onclick="setFocusTime(25, this)">25 Phút (Chuẩn)</button>
+                <button class="f-opt-btn" onclick="setFocusTime(50, this)">50 Phút (Deep Work)</button>
+            </div>
+
+            <div class="focus-controls">
+                <button class="f-ctrl-btn play" id="focus-play-btn" onclick="toggleFocusTimer()">
+                    <i class="fa-solid fa-play"></i> Bắt đầu
+                </button>
+                <button class="f-ctrl-btn stop" onclick="resetFocusTimer()">
+                    <i class="fa-solid fa-rotate-right"></i> Làm lại
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="icon-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3><i class="fa-solid fa-layer-group" style="color: var(--accent-cyan);"></i> Tạo Thẻ Gợi Ý Mới</h3>
+            <input type="text" id="modal-sug-text" class="input-field" placeholder="Ví dụ: Tập Yoga..." style="width: 100%; margin-bottom: 15px;">
+            <div class="icon-picker-grid" id="icon-picker-grid"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('icon-modal')">Hủy bỏ</button>
+                <button class="btn-add" style="padding: 10px 20px;" onclick="saveCustomSuggestion()">Lưu Lại</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="task-detail-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <h3 id="td-title" style="color: var(--accent-cyan); font-size: 1.3rem; margin-bottom: 5px;">Tên Công Việc</h3>
+                <i class="fa-solid fa-xmark" style="cursor:pointer; font-size: 1.2rem; color: var(--text-sub);" onclick="closeModal('task-detail-modal')"></i>
+            </div>
+            <div id="td-meta" style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;"></div>
+            
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-sub);">
+                    <span>Tiến độ công việc này:</span>
+                    <span id="td-progress-text" style="color: #fff; font-weight: 600;">0%</span>
+                </div>
+                <div class="pb-container">
+                    <div class="pb-fill" id="td-progress-bar"></div>
+                </div>
+            </div>
+
+            <hr style="border-color: var(--glass-border); margin-bottom: 15px;">
+
+            <div style="font-size: 0.95rem; font-weight: 600; margin-bottom: 10px;">Các bước nhỏ cần làm:</div>
+            <div class="input-form" style="flex-direction: row; gap: 8px;">
+                <input type="text" id="td-subtask-input" class="input-field" placeholder="Ví dụ: Bước 1..." style="flex: 1;">
+                <button class="btn-add" onclick="addSubtask()"><i class="fa-solid fa-plus"></i></button>
+            </div>
+
+            <div id="td-subtask-list" style="margin-top: 15px; max-height: 250px; overflow-y: auto; padding-right: 5px;"></div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        let currentUser = null;
+        let tasks = [];
+        let suggestions = [];
+        let selectedDateStr = new Date().toISOString().split('T')[0];
+        let currentPeriod = 'week';
+        let perfChart = null;
+        
+        let alertedTasks = {}; 
+        let currentDetailTaskId = null;
+
+        // BIẾN CHO CHẾ ĐỘ TẬP TRUNG
+        let focusInterval = null;
+        let focusTotalTime = 25 * 60; // Mặc định 25 phút
+        let focusTimeLeft = 25 * 60;
+        let isFocusRunning = false;
+
+        const defaultSuggestions = [
+            { id: 1, text: 'Tập thể dục 30p', icon: 'fa-person-running', priority: 'high' },
+            { id: 2, text: 'Uống nước', icon: 'fa-glass-water', priority: 'medium' },
+            { id: 3, text: 'Đọc sách', icon: 'fa-book-open', priority: 'low' }
+        ];
+
+        const iconLibrary = [
+            'fa-star', 'fa-heart', 'fa-person-running', 'fa-dumbbell', 'fa-person-swimming', 'fa-bicycle',
+            'fa-glass-water', 'fa-mug-hot', 'fa-utensils', 'fa-apple-whole', 'fa-burger', 'fa-book-open', 
+            'fa-laptop-code', 'fa-briefcase', 'fa-graduation-cap', 'fa-broom', 'fa-shower', 'fa-bed', 
+            'fa-cart-shopping', 'fa-music', 'fa-gamepad', 'fa-spa', 'fa-bolt', 'fa-fire'
+        ];
+        let selectedIcon = 'fa-star';
+
+        /* KHỞI TẠO */
+        window.onload = () => {
+            checkAuth();
+            setInterval(runtimeLoop, 1000); 
+            renderIconPicker();
+        };
+
+        function checkAuth() {
+            currentUser = localStorage.getItem('logged_in_user');
+            if (currentUser) {
+                document.getElementById('login-wrapper').style.display = 'none';
+                document.getElementById('main-wrapper').style.display = 'flex';
+                document.getElementById('welcome-title').innerHTML = `<i class="fa-solid fa-hand-sparkles" style="color:#fcd34d;"></i> Xin chào, ${currentUser}!`;
+                loadUserData();
+                document.getElementById('current-date-picker').value = selectedDateStr;
+                renderSuggestions();
+                renderTasks();
+                if (!perfChart) initChart(); else updateChart();
+            } else {
+                document.getElementById('login-wrapper').style.display = 'flex';
+                document.getElementById('main-wrapper').style.display = 'none';
+            }
+        }
+
+        function handleLogin() {
+            const nameInput = document.getElementById('login-username').value.trim();
+            const formattedName = nameInput.charAt(0).toUpperCase() + nameInput.slice(1);
+            if (formattedName === '') { alert('Vui lòng nhập tên!'); return; }
+            localStorage.setItem('logged_in_user', formattedName);
+            document.getElementById('login-username').value = '';
+            checkAuth();
+        }
+
+        function handleLogout() {
+            if(confirm("Bạn có muốn đăng xuất?")) {
+                localStorage.removeItem('logged_in_user');
+                alertedTasks = {};
+                checkAuth();
+            }
+        }
+
+        function loadUserData() {
+            tasks = JSON.parse(localStorage.getItem(`tasks_${currentUser}`)) || [];
+            tasks.forEach(t => { if(!t.subtasks) t.subtasks = []; });
+            suggestions = JSON.parse(localStorage.getItem(`suggestions_${currentUser}`)) || defaultSuggestions;
+        }
+        function saveUserData() {
+            localStorage.setItem(`tasks_${currentUser}`, JSON.stringify(tasks));
+            localStorage.setItem(`suggestions_${currentUser}`, JSON.stringify(suggestions));
+        }
+
+        /* ENGINE THỜI GIAN */
+        function runtimeLoop() {
+            if(!currentUser) return;
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock-time').textContent = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('clock-date').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            const todayStr = now.toISOString().split('T')[0];
+            if (selectedDateStr === todayStr) updateTaskTrackers(now);
+        }
+
+        function updateTaskTrackers(nowObj) {
+            const nowMs = nowObj.getTime();
+            tasks.forEach(task => {
+                if (task.date !== selectedDateStr || task.completed || !task.startTime) return;
+                const statusEl = document.getElementById(`status-${task.id}`);
+                if (!statusEl) return;
+
+                const startMs = new Date(`${task.date}T${task.startTime}:00`).getTime();
+                let endMs = null;
+                if (task.endTime) {
+                    endMs = new Date(`${task.date}T${task.endTime}:00`).getTime();
+                    if (endMs <= startMs) endMs += 86400000; 
+                }
+
+                let diffStart = startMs - nowMs;
+                let diffEnd = endMs ? (endMs - nowMs) : null;
+                let html = "";
+
+                if (diffStart > 0) {
+                    let minsToStart = Math.ceil(diffStart / 60000);
+                    if (minsToStart <= 15) html = `<div class="status-tracker st-upcoming"><i class="fa-solid fa-bell"></i> Sắp bắt đầu: ${minsToStart}p</div>`;
+                    else html = `<div class="status-tracker st-future"><i class="fa-solid fa-hourglass-start"></i> Bắt đầu sau: ${formatTimeText(minsToStart)}</div>`;
+                } else if (diffStart <= 0 && (!endMs || diffEnd > 0)) {
+                    if (endMs) html = `<div class="status-tracker st-ongoing"><i class="fa-solid fa-spinner fa-spin"></i> Đang làm: Còn ${formatTimeText(Math.ceil(diffEnd / 60000))}</div>`;
+                    else html = calculateLateness(diffStart, task, "Bắt đầu");
+                } else if (endMs && diffEnd <= 0) {
+                    html = calculateLateness(diffEnd, task, "Kết thúc");
+                }
+                statusEl.innerHTML = html;
+            });
+        }
+
+        function calculateLateness(diffMs, task, typeStr) {
+            let lateMins = Math.floor(Math.abs(diffMs) / 60000);
+            if (lateMins >= 20) {
+                triggerToast(task.id, 'late20', `Báo Động: ${task.text}`, `Trễ ${typeStr.toLowerCase()} ${lateMins} phút!`, 'danger');
+                return `<div class="status-tracker st-late-20"><i class="fa-solid fa-triangle-exclamation"></i> Quá hạn ${lateMins} phút!</div>`;
+            } else if (lateMins >= 10) {
+                triggerToast(task.id, 'late10', `Cảnh báo: ${task.text}`, `Muộn ${lateMins} phút!`, 'warning');
+                return `<div class="status-tracker st-late-10"><i class="fa-solid fa-circle-exclamation"></i> Muộn ${lateMins} phút</div>`;
+            } else if (lateMins >= 5) {
+                triggerToast(task.id, 'late5', `Nhắc nhở: ${task.text}`, `Trễ ${lateMins} phút.`, 'warning');
+                return `<div class="status-tracker st-late-5"><i class="fa-regular fa-clock"></i> Trễ ${lateMins} phút</div>`;
+            } else return `<div class="status-tracker st-late-5"><i class="fa-solid fa-exclamation"></i> Vừa trễ hạn</div>`;
+        }
+        function formatTimeText(totalMins) {
+            if (totalMins < 60) return `${totalMins} phút`;
+            return `${Math.floor(totalMins / 60)}h ${totalMins % 60}p`;
+        }
+
+        /* TOAST */
+        function triggerToast(taskId, level, title, msg, type) {
+            const alertKey = `${taskId}_${level}`;
+            if (!alertedTasks[alertKey]) { showToast(title, msg, type); alertedTasks[alertKey] = true; }
+        }
+        function showToast(title, message, type) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div'); toast.className = `toast t-${type}`;
+            let iconClass = type === 'warning' ? 'fa-exclamation-triangle' : (type === 'danger' ? 'fa-skull-crossbones' : 'fa-info-circle');
+            toast.innerHTML = `<div class="toast-icon"><i class="fa-solid ${iconClass}"></i></div><div class="toast-content"><h4>${title}</h4><p>${message}</p></div>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 5000);
+        }
+
+        /* GIAO DIỆN CHUNG */
+        function toggleCard(cardId) { document.getElementById(cardId).classList.toggle('collapsed'); }
+        function changeDate(offset) {
+            let d = new Date(selectedDateStr); d.setDate(d.getDate() + offset);
+            selectedDateStr = d.toISOString().split('T')[0];
+            document.getElementById('current-date-picker').value = selectedDateStr;
+            renderTasks();
+        }
+        function onDateSelect(val) { if(val) { selectedDateStr = val; renderTasks(); } }
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+        /* GỢI Ý */
+        function renderSuggestions() {
+            const grid = document.getElementById('suggestion-grid'); grid.innerHTML = '';
+            suggestions.forEach(sug => {
+                const chip = document.createElement('div'); chip.className = 'sug-chip';
+                chip.innerHTML = `<span onclick="fillSuggestionForm('${escapeHtml(sug.text)}', '${sug.priority}')" style="display:flex; align-items:center; gap:8px;"><i class="fa-solid ${sug.icon}"></i> ${escapeHtml(sug.text)}</span><i class="fa-solid fa-xmark sug-chip-del" onclick="deleteSuggestion(${sug.id}, event)"></i>`;
+                grid.appendChild(chip);
+            });
+        }
+        function fillSuggestionForm(text, prio) {
+            document.getElementById('task-input').value = text; document.getElementById('task-priority').value = prio; document.getElementById('task-start-time').focus();
+        }
+        function renderIconPicker() {
+            const grid = document.getElementById('icon-picker-grid'); grid.innerHTML = '';
+            iconLibrary.forEach(cls => {
+                const div = document.createElement('div'); div.className = `icon-option ${cls === selectedIcon ? 'active' : ''}`;
+                div.innerHTML = `<i class="fa-solid ${cls}"></i>`; div.onclick = () => { selectedIcon = cls; document.querySelectorAll('.icon-option').forEach(el=>el.classList.remove('active')); div.classList.add('active'); };
+                grid.appendChild(div);
+            });
+        }
+        function openIconModal() { document.getElementById('modal-sug-text').value = ''; openModal('icon-modal'); }
+        function saveCustomSuggestion() {
+            const txt = document.getElementById('modal-sug-text').value.trim();
+            if(!txt) return alert('Nhập tên!');
+            suggestions.push({id: Date.now(), text: txt, icon: selectedIcon, priority: 'medium'});
+            saveUserData(); renderSuggestions(); closeModal('icon-modal');
+        }
+        function deleteSuggestion(id, e) { e.stopPropagation(); suggestions = suggestions.filter(s=>s.id!==id); saveUserData(); renderSuggestions(); }
+
+        /* QUẢN LÝ CÔNG VIỆC */
+        document.getElementById('task-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
+
+        function addTask() {
+            const text = document.getElementById('task-input').value.trim();
+            if(!text) return;
+            tasks.push({
+                id: Date.now(), date: selectedDateStr, text: text,
+                priority: document.getElementById('task-priority').value,
+                repeat: document.getElementById('task-repeat').value,
+                startTime: document.getElementById('task-start-time').value || null,
+                endTime: document.getElementById('task-end-time').value || null,
+                completed: false, subtasks: []
+            });
+            saveUserData(); renderTasks(); updateChart();
+            document.getElementById('task-input').value = ''; document.getElementById('task-start-time').value = ''; document.getElementById('task-end-time').value = '';
+        }
+
+        function toggleTask(id) { tasks = tasks.map(t=>t.id===id?{...t,completed:!t.completed}:t); saveUserData(); renderTasks(); updateChart(); }
+        function deleteTask(id) { tasks = tasks.filter(t=>t.id!==id); saveUserData(); renderTasks(); updateChart(); }
+
+        function generateRecurringTasksForDate(target) {
+            let mod = false;
+            const [y,m,d] = target.split('-'); const targetMs = new Date(y,m-1,d).getTime();
+            tasks.filter(t=>t.repeat && t.repeat!=='none').forEach(orig => {
+                const [oy,om,od] = orig.date.split('-'); const origMs = new Date(oy,om-1,od).getTime();
+                if(origMs >= targetMs) return;
+                let dup = false;
+                if(orig.repeat === 'daily') dup = true;
+                else if(orig.repeat === 'weekly' && Math.round((targetMs-origMs)/86400000)%7===0) dup = true;
+                if(dup && !tasks.some(t=>t.date===target && t.text===orig.text && t.startTime===orig.startTime)) {
+                    const clonedSubtasks = orig.subtasks.map(s => ({...s, completed: false, id: Date.now() + Math.random()}));
+                    tasks.push({...orig, id:Date.now()+Math.floor(Math.random()*1000), date:target, completed:false, subtasks: clonedSubtasks}); 
+                    mod = true;
+                }
+            });
+            if(mod) saveUserData();
+        }
+
+        function renderTasks() {
+            generateRecurringTasksForDate(selectedDateStr);
+            const list = document.getElementById('task-list'); list.innerHTML = '';
+            const dayTasks = tasks.filter(t=>t.date===selectedDateStr);
+            
+            // Tính toán Thanh tiến độ ngày
+            let dayDoneCount = 0;
+            if(dayTasks.length > 0) {
+                dayDoneCount = dayTasks.filter(t => t.completed).length;
+                let dailyRate = Math.round((dayDoneCount / dayTasks.length) * 100);
+                document.getElementById('daily-progress-bar').style.width = `${dailyRate}%`;
+                document.getElementById('daily-progress-text').innerText = `${dailyRate}% (${dayDoneCount}/${dayTasks.length})`;
+            } else {
+                document.getElementById('daily-progress-bar').style.width = `0%`;
+                document.getElementById('daily-progress-text').innerText = `0% (0/0)`;
+            }
+
+            if(!dayTasks.length) { list.innerHTML = `<div class="empty-state">Không có công việc nào.</div>`; return; }
+            
+            dayTasks.forEach(task => {
+                const li = document.createElement('li'); li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                
+                let prioLbl = 'Trung bình', prioCls = 'badge-priority-medium';
+                if(task.priority==='high'){ prioLbl='Quan trọng'; prioCls='badge-priority-high';}
+                else if(task.priority==='low'){ prioLbl='Thấp'; prioCls='badge-priority-low';}
+                
+                let timeHtml = task.startTime ? `<span class="time-badge"><i class="fa-regular fa-clock"></i> ${task.startTime} ${task.endTime ? '- '+task.endTime : ''}</span>` : '';
+                let repHtml = task.repeat!=='none' ? `<span class="repeat-badge"><i class="fa-solid fa-arrows-rotate"></i></span>` : '';
+                let subBadge = '';
+                if(task.subtasks && task.subtasks.length > 0) {
+                    const doneSubs = task.subtasks.filter(s=>s.completed).length;
+                    subBadge = `<span class="badge badge-subtask"><i class="fa-solid fa-layer-group"></i> ${doneSubs}/${task.subtasks.length}</span>`;
+                }
+
+                li.innerHTML = `
+                    <div class="task-left">
+                        <input type="checkbox" class="task-checkbox" ${task.completed?'checked':''} onclick="toggleTask(${task.id})">
+                        <div class="task-info" onclick="openTaskDetails(${task.id})">
+                            <span class="task-text">${escapeHtml(task.text)}</span>
+                            <div class="task-meta"><span class="badge ${prioCls}">${prioLbl}</span> ${timeHtml} ${subBadge} ${repHtml}</div>
+                            <div id="status-${task.id}" style="margin-top: 4px;"></div>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn-action focus" title="Chế độ Tập Trung" onclick="openFocusMode(${task.id})"><i class="fa-solid fa-stopwatch"></i></button>
+                        <button class="btn-action delete" title="Xóa" onclick="deleteTask(${task.id})"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+            updateTaskTrackers(new Date()); 
+        }
+
+        /* ================== LỚP CHI TIẾT (SUB-TASKS) ================== */
+        document.getElementById('td-subtask-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addSubtask(); });
+
+        function openTaskDetails(taskId) {
+            currentDetailTaskId = taskId;
+            const task = tasks.find(t => t.id === taskId);
+            if(!task) return;
+            document.getElementById('td-title').innerText = task.text;
+            let prioLbl = task.priority==='high' ? 'Quan trọng' : (task.priority==='low' ? 'Thấp' : 'Trung bình');
+            let metaHtml = `<span class="badge badge-priority-${task.priority}">${prioLbl}</span>`;
+            if(task.startTime) metaHtml += `<span class="time-badge"><i class="fa-regular fa-clock"></i> ${task.startTime} ${task.endTime ? '- '+task.endTime : ''}</span>`;
+            document.getElementById('td-meta').innerHTML = metaHtml;
+            renderSubtasksModal();
+            openModal('task-detail-modal');
+        }
+
+        function renderSubtasksModal() {
+            const task = tasks.find(t => t.id === currentDetailTaskId);
+            if(!task) return;
+            const list = document.getElementById('td-subtask-list'); list.innerHTML = '';
+            const subs = task.subtasks || [];
+            let doneCount = 0;
+
+            if(subs.length === 0) { list.innerHTML = `<div class="empty-state" style="font-size:0.85rem;">Chưa có bước nhỏ nào. Hãy thêm ở trên!</div>`; } 
+            else {
+                subs.forEach(sub => {
+                    if(sub.completed) doneCount++;
+                    list.innerHTML += `
+                        <div class="subtask-item ${sub.completed ? 'done' : ''}">
+                            <div style="display:flex; align-items:center; gap: 10px; cursor:pointer;" onclick="toggleSubtask(${sub.id})">
+                                <input type="checkbox" style="width:16px; height:16px; accent-color: var(--accent-purple);" ${sub.completed ? 'checked' : ''}>
+                                <span>${escapeHtml(sub.text)}</span>
+                            </div>
+                            <i class="fa-solid fa-trash-can btn-delete" style="font-size:0.9rem;" onclick="deleteSubtask(${sub.id})"></i>
+                        </div>
+                    `;
+                });
+            }
+
+            let percent = subs.length > 0 ? Math.round((doneCount / subs.length) * 100) : (task.completed ? 100 : 0);
+            document.getElementById('td-progress-bar').style.width = `${percent}%`;
+            document.getElementById('td-progress-text').innerText = `${percent}%`;
+
+            if(subs.length > 0 && doneCount === subs.length && !task.completed) {
+                task.completed = true; saveUserData(); renderTasks(); updateChart();
+            } else if (subs.length > 0 && doneCount < subs.length && task.completed) {
+                task.completed = false; saveUserData(); renderTasks(); updateChart();
+            }
+        }
+
+        function addSubtask() {
+            const input = document.getElementById('td-subtask-input'); const text = input.value.trim();
+            if(!text || !currentDetailTaskId) return;
+            const task = tasks.find(t => t.id === currentDetailTaskId);
+            if(!task.subtasks) task.subtasks = [];
+            task.subtasks.push({ id: Date.now(), text: text, completed: false });
+            saveUserData(); input.value = ''; renderSubtasksModal(); renderTasks();
+        }
+        function toggleSubtask(subId) { const task = tasks.find(t => t.id === currentDetailTaskId); const sub = task.subtasks.find(s => s.id === subId); sub.completed = !sub.completed; saveUserData(); renderSubtasksModal(); renderTasks(); }
+        function deleteSubtask(subId) { const task = tasks.find(t => t.id === currentDetailTaskId); task.subtasks = task.subtasks.filter(s => s.id !== subId); saveUserData(); renderSubtasksModal(); renderTasks(); }
+
+        /* ================== CHẾ ĐỘ TẬP TRUNG (FOCUS MODE - MỚI) ================== */
+        function openFocusMode(taskId) {
+            currentDetailTaskId = taskId;
+            const task = tasks.find(t => t.id === taskId);
+            if(!task) return;
+            
+            document.getElementById('focus-task-name').innerText = task.text;
+            document.getElementById('focus-mode-overlay').classList.add('show');
+            
+            // Thiết lập mặc định là 25 phút
+            const defaultBtn = document.querySelectorAll('.f-opt-btn')[1]; // Nút giữa (25 phút)
+            setFocusTime(25, defaultBtn);
+        }
+
+        function closeFocusMode() {
+            document.getElementById('focus-mode-overlay').classList.remove('show');
+            if(isFocusRunning) toggleFocusTimer(); // Dừng nếu đang chạy
+        }
+
+        function setFocusTime(mins, btnElement) {
+            if(isFocusRunning) toggleFocusTimer(); // Tạm dừng nếu đang chạy
+            focusTotalTime = mins * 60;
+            focusTimeLeft = focusTotalTime;
+            
+            // Cập nhật UI nút bấm
+            document.querySelectorAll('.f-opt-btn').forEach(b => b.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+            
+            updateFocusDisplay();
+        }
+
+        function updateFocusDisplay() {
+            let m = Math.floor(focusTimeLeft / 60);
+            let s = focusTimeLeft % 60;
+            document.getElementById('focus-timer-display').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+
+        function toggleFocusTimer() {
+            const playBtn = document.getElementById('focus-play-btn');
+            if(isFocusRunning) {
+                // Tạm dừng
+                clearInterval(focusInterval);
+                isFocusRunning = false;
+                playBtn.innerHTML = '<i class="fa-solid fa-play"></i> Tiếp tục';
+                playBtn.style.background = 'var(--text-main)';
+                playBtn.style.color = '#0f172a';
+            } else {
+                // Bắt đầu chạy
+                isFocusRunning = true;
+                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Tạm dừng';
+                playBtn.style.background = 'var(--accent-cyan)';
+                playBtn.style.color = '#fff';
+                
+                focusInterval = setInterval(() => {
+                    focusTimeLeft--;
+                    updateFocusDisplay();
+                    
+                    if(focusTimeLeft <= 0) {
+                        clearInterval(focusInterval);
+                        isFocusRunning = false;
+                        playBtn.innerHTML = '<i class="fa-solid fa-play"></i> Bắt đầu';
+                        playBtn.style.background = 'var(--text-main)';
+                        playBtn.style.color = '#0f172a';
+                        
+                        playBeepSound(); // Phát âm thanh
+                        showToast('Hoàn thành!', 'Bạn đã hoàn thành phiên tập trung xuất sắc!', 'info');
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetFocusTimer() {
+            if(isFocusRunning) toggleFocusTimer();
+            focusTimeLeft = focusTotalTime;
+            updateFocusDisplay();
+        }
+
+        // Phát âm thanh tiếng Beep đơn giản bằng Web Audio API
+        function playBeepSound() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, ctx.currentTime);
+            gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.5);
+        }
+
+        /* ================== PHÂN TÍCH CHUYÊN SÂU ================== */
+        function initChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            perfChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { type: 'line', label: 'Tỷ lệ %', data: [], borderColor: '#a855f7', backgroundColor: '#a855f7', yAxisID: 'y1', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
+                        { type: 'bar', label: 'Đã xong', data: [], backgroundColor: '#10b981', yAxisID: 'y' },
+                        { type: 'bar', label: 'Chưa xong', data: [], backgroundColor: '#ef4444', yAxisID: 'y' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { stacked: true, ticks: { color: '#94a3b8' }, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y1: { position: 'right', beginAtZero: true, max: 100, ticks: { color: '#a855f7' }, grid: { drawOnChartArea: false } }
+                    },
+                    plugins: { legend: { labels: { color: '#f8fafc' } } }
+                }
+            });
+            updateChart();
+        }
+
+        function switchChartPeriod(period, btn) {
+            document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentPeriod = period;
+            updateChart();
+        }
+
+        function updateChart() {
+            if(!perfChart) return;
+            let labels = [], rates = [], doneArr = [], pendingArr = [];
+            let tot = 0, comp = 0, highMissed = 0;
+            let bestDay = { label: '', count: -1 };
+            const now = new Date();
+
+            if (currentPeriod === 'week') {
+                for (let i = 6; i >= 0; i--) {
+                    let d = new Date(); d.setDate(now.getDate() - i);
+                    let dStr = d.toISOString().split('T')[0];
+                    let dTasks = tasks.filter(t => t.date === dStr);
+                    let dC = dTasks.filter(t => t.completed).length;
+                    let dP = dTasks.length - dC;
+                    let rate = dTasks.length ? Math.round((dC / dTasks.length) * 100) : 0;
+                    labels.push(d.toLocaleDateString('vi-VN', { weekday: 'short' }));
+                    rates.push(rate); doneArr.push(dC); pendingArr.push(dP);
+                    tot += dTasks.length; comp += dC;
+                    highMissed += dTasks.filter(t => !t.completed && t.priority === 'high' && t.date < selectedDateStr).length;
+                    if(dC > bestDay.count && dC > 0) { bestDay.count = dC; bestDay.label = d.toLocaleDateString('vi-VN', { weekday: 'long' }); }
+                }
+            } else if (currentPeriod === 'month') {
+                for (let i = 3; i >= 0; i--) {
+                    labels.push(`Tuần ${4 - i}`);
+                    let wTot = 0, wComp = 0, wHighMiss = 0;
+                    for (let j = 0; j < 7; j++) {
+                        let d = new Date(); d.setDate(now.getDate() - (i * 7 + j));
+                        let dStr = d.toISOString().split('T')[0];
+                        let dTasks = tasks.filter(t => t.date === dStr);
+                        wTot += dTasks.length; wComp += dTasks.filter(t => t.completed).length;
+                        wHighMiss += dTasks.filter(t => !t.completed && t.priority === 'high' && t.date < selectedDateStr).length;
+                    }
+                    rates.push(wTot ? Math.round((wComp / wTot) * 100) : 0);
+                    doneArr.push(wComp); pendingArr.push(wTot - wComp);
+                    tot += wTot; comp += wComp; highMissed += wHighMiss;
+                    if(wComp > bestDay.count && wComp > 0) { bestDay.count = wComp; bestDay.label = `Tuần ${4-i}`; }
+                }
+            }
+
+            perfChart.data.labels = labels; perfChart.data.datasets[0].data = rates; perfChart.data.datasets[1].data = doneArr; perfChart.data.datasets[2].data = pendingArr; perfChart.update();
+
+            let overallRate = tot ? Math.round((comp / tot) * 100) : 0;
+            document.getElementById('kpi-total').innerText = tot; document.getElementById('kpi-done').innerText = comp; document.getElementById('kpi-rate').innerText = `${overallRate}%`;
+
+            let analysisHtml = `<ul>`;
+            if (tot === 0) {
+                analysisHtml += `<li><i class="fa-solid fa-moon" style="color:var(--text-sub);"></i> Chưa có dữ liệu lịch sử trong giai đoạn này. Hãy lên kế hoạch nhé!</li>`;
+            } else {
+                if (overallRate >= 80) analysisHtml += `<li><i class="fa-solid fa-award" style="color:#fde047;"></i> Bạn đang làm việc <b>Cực kỳ xuất sắc</b> với tỷ lệ hoàn thành lên tới ${overallRate}%. Hãy giữ vững phong độ!</li>`;
+                else if (overallRate >= 50) analysisHtml += `<li><i class="fa-solid fa-thumbs-up" style="color:var(--accent-cyan);"></i> Phong độ <b>Khá Tốt</b> (${overallRate}%). Thêm một chút tập trung nữa để bứt phá nhé.</li>`;
+                else analysisHtml += `<li><i class="fa-solid fa-triangle-exclamation" style="color:#fca5a5;"></i> Cảnh báo: Tỷ lệ hoàn thành đang <b>Khá Thấp</b> (${overallRate}%). Bạn có đang ôm đồm quá nhiều việc không?</li>`;
+
+                if (bestDay.count > 0) analysisHtml += `<li><i class="fa-solid fa-fire" style="color:#fb923c;"></i> <b>Năng suất đỉnh cao:</b> Rơi vào ${bestDay.label} với ${bestDay.count} việc được xử lý gọn gàng.</li>`;
+                if (highMissed > 0) analysisHtml += `<li><i class="fa-solid fa-circle-exclamation" style="color:var(--priority-high);"></i> <b>Cần lưu ý:</b> Bạn đã bỏ lỡ ${highMissed} công việc gắn cờ "Quan trọng & Gấp". Hãy ưu tiên giải quyết chúng trước!</li>`;
+                else analysisHtml += `<li><i class="fa-solid fa-shield-check" style="color:var(--priority-low);"></i> <b>Kỷ luật tốt:</b> Bạn không bỏ sót bất kỳ công việc ưu tiên cao nào!</li>`;
+            }
+            analysisHtml += `</ul>`;
+            document.getElementById('deep-analysis-content').innerHTML = analysisHtml;
+        }
+
+        function escapeHtml(t) { const d = document.createElement('div'); d.innerText = t; return d.innerHTML; }
+    </script>
+</body>
+</html>
