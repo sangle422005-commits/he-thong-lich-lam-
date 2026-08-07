@@ -1,35 +1,40 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
+const { initializeApp } = require('firebase/app');
+const { getAnalytics } = require('firebase/analytics');
+const { getFirestore, doc, getDoc, setDoc, updateDoc } = require('firebase/firestore');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBf6TJtBGQ1CRI3VtCaLRdkencJxwq8SQw",
+  authDomain: "sanglexd.firebaseapp.com",
+  projectId: "sanglexd",
+  storageBucket: "sanglexd.firebasestorage.app",
+  messagingSenderId: "190582840708",
+  appId: "1:190582840708:web:05f4e179bd94ce346351d1",
+  measurementId: "G-2471QSQVZM"
+};
+
+// Initialize Firebase App
+const firebaseApp = initializeApp(firebaseConfig);
+
+// Initialize Firebase Analytics (Analytics is client-side/browser safe)
+let analytics;
+if (typeof window !== 'undefined') {
+  analytics = getAnalytics(firebaseApp);
+}
+
+// Initialize Firestore
+const db = getFirestore(firebaseApp);
+
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(__dirname)); // Serves index.html from root
 
-// Initialize SQLite Database
-const db = new sqlite3.Database('./database.sqlite', (err) => {
-    if (err) {
-        console.error('Error opening database:', err.message);
-    } else {
-        console.log('Connected to SQLite database.');
-        db.run(`
-            CREATE TABLE IF NOT EXISTS users (
-                username TEXT PRIMARY KEY,
-                tasks TEXT DEFAULT '[]',
-                suggestions TEXT DEFAULT '[]',
-                theme TEXT DEFAULT 'dark',
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-    }
-});
-
-// Default suggestions template for new users
 const defaultSuggestions = [
     { id: 1, text: 'Tập thể dục 30 phút', icon: 'fa-person-running', priority: 'high' },
     { id: 2, text: 'Uống đủ nước', icon: 'fa-glass-water', priority: 'medium' },
@@ -39,72 +44,56 @@ const defaultSuggestions = [
 /* --- REST API ENDPOINTS --- */
 
 // Login or auto-create account by Username
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { username } = req.body;
     if (!username || !username.trim()) {
         return res.status(400).json({ error: 'Username is required' });
     }
 
     const cleanUsername = username.trim().toLowerCase();
+    const userRef = doc(db, "users", cleanUsername);
 
-    db.get('SELECT * FROM users WHERE username = ?', [cleanUsername], (err, row) => {
-        if (err) {
-            return res.status(500).json({ error: 'Database error' });
-        }
+    try {
+        const userSnap = await getDoc(userRef);
 
-        if (row) {
-            // Existing user
-            return res.json({
-                username: row.username,
-                tasks: JSON.parse(row.tasks),
-                suggestions: JSON.parse(row.suggestions),
-                theme: row.theme
-            });
+        if (userSnap.exists()) {
+            // Return existing user data
+            return res.json(userSnap.data());
         } else {
-            // New user registration
-            const defaultTasks = [];
-            const defaultTheme = 'dark';
-            const jsonSuggestions = JSON.stringify(defaultSuggestions);
-            const jsonTasks = JSON.stringify(defaultTasks);
-
-            db.run(
-                'INSERT INTO users (username, tasks, suggestions, theme) VALUES (?, ?, ?, ?)',
-                [cleanUsername, jsonTasks, jsonSuggestions, defaultTheme],
-                (insertErr) => {
-                    if (insertErr) {
-                        return res.status(500).json({ error: 'Failed to create user' });
-                    }
-                    res.json({
-                        username: cleanUsername,
-                        tasks: defaultTasks,
-                        suggestions: defaultSuggestions,
-                        theme: defaultTheme
-                    });
-                }
-            );
+            // Register new user
+            const newUser = {
+                username: cleanUsername,
+                tasks: [],
+                suggestions: defaultSuggestions,
+                theme: 'dark'
+            };
+            await setDoc(userRef, newUser);
+            return res.json(newUser);
         }
-    });
+    } catch (err) {
+        console.error("Firestore Login Error:", err);
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
 // Get user data
-app.get('/api/user/:username', (req, res) => {
+app.get('/api/user/:username', async (req, res) => {
     const cleanUsername = req.params.username.trim().toLowerCase();
+    const userRef = doc(db, "users", cleanUsername);
 
-    db.get('SELECT * FROM users WHERE username = ?', [cleanUsername], (err, row) => {
-        if (err || !row) {
+    try {
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) {
             return res.status(404).json({ error: 'User not found' });
         }
-        res.json({
-            username: row.username,
-            tasks: JSON.parse(row.tasks),
-            suggestions: JSON.parse(row.suggestions),
-            theme: row.theme
-        });
-    });
+        res.json(userSnap.data());
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-// Sync/Save user state (Tasks, Suggestions, Theme)
-app.post('/api/sync', (req, res) => {
+// Sync/Save user state
+app.post('/api/sync', async (req, res) => {
     const { username, tasks, suggestions, theme } = req.body;
 
     if (!username) {
@@ -112,22 +101,23 @@ app.post('/api/sync', (req, res) => {
     }
 
     const cleanUsername = username.trim().toLowerCase();
-    const jsonTasks = JSON.stringify(tasks || []);
-    const jsonSuggestions = JSON.stringify(suggestions || []);
+    const userRef = doc(db, "users", cleanUsername);
 
-    db.run(
-        `UPDATE users SET tasks = ?, suggestions = ?, theme = ?, updated_at = CURRENT_TIMESTAMP WHERE username = ?`,
-        [jsonTasks, jsonSuggestions, theme || 'dark', cleanUsername],
-        function (err) {
-            if (err) {
-                return res.status(500).json({ error: 'Failed to sync data' });
-            }
-            res.json({ success: true });
-        }
-    );
+    try {
+        await updateDoc(userRef, {
+            tasks: tasks || [],
+            suggestions: suggestions || [],
+            theme: theme || 'dark',
+            updatedAt: new Date().toISOString()
+        });
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Firestore Sync Error:", err);
+        res.status(500).json({ error: 'Failed to sync data' });
+    }
 });
 
-// Catch-all route to serve the frontend
+// Catch-all route to serve index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
