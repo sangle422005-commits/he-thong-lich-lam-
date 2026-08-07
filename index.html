@@ -484,7 +484,7 @@
         let currentPeriod = 'week';
         let perfChart = null;
         let currentTheme = 'dark';
-        let authMode = 'login'; // 'login' or 'register'
+        let authMode = 'login'; 
         
         let alertedTasks = {}; 
         let currentDetailTaskId = null;
@@ -495,6 +495,7 @@
         let focusTimeLeft = 25 * 60;
         let isFocusRunning = false;
         let clockTimerId = null;
+        let syncPollTimer = null;
 
         // DOM CACHE
         const domCache = {};
@@ -521,6 +522,57 @@
             startClockLoop();
             renderIconPicker();
         };
+
+        /* MULTI-DEVICE SYNCING POLLER */
+        function startMultiDeviceSync() {
+            if (!syncPollTimer) {
+                syncPollTimer = setInterval(() => {
+                    if (currentUser && !document.hidden) {
+                        fetchUserDataSilent(currentUser);
+                    }
+                }, 5000); 
+            }
+        }
+
+        function stopMultiDeviceSync() {
+            if (syncPollTimer) {
+                clearInterval(syncPollTimer);
+                syncPollTimer = null;
+            }
+        }
+
+        async function fetchUserDataSilent(username) {
+            try {
+                const res = await fetch(`/api/user/${encodeURIComponent(username)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    const newTasksStr = JSON.stringify(data.tasks || []);
+                    const currentTasksStr = JSON.stringify(tasks);
+                    
+                    if (newTasksStr !== currentTasksStr) {
+                        tasks = data.tasks || [];
+                        suggestions = data.suggestions || [];
+                        renderSuggestions();
+                        renderTasks();
+                        if (perfChart) updateChart();
+                        
+                        if (currentDetailTaskId) {
+                            renderSubtasksModal();
+                        }
+                    }
+
+                    if (data.theme && data.theme !== currentTheme) {
+                        currentTheme = data.theme;
+                        document.documentElement.setAttribute('data-theme', currentTheme);
+                        getDom('theme-dropdown').value = currentTheme;
+                        if (perfChart) updateChartColors();
+                    }
+                }
+            } catch (err) {
+                console.log("Background sync pause...");
+            }
+        }
 
         /* AUTHENTICATION TAB & SUBMISSION HANDLERS */
         function switchAuthTab(mode) {
@@ -627,9 +679,12 @@
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 stopClockLoop();
+                stopMultiDeviceSync();
             } else {
                 runtimeLoop();
                 startClockLoop();
+                startMultiDeviceSync();
+                if (currentUser) fetchUserDataSilent(currentUser);
             }
         });
 
@@ -655,9 +710,11 @@
                 getDom('welcome-title').innerHTML = `<i class="fa-solid fa-circle-user" style="color: var(--accent-primary);"></i> Xin chào, ${currentUser}`;
                 getDom('current-date-picker').value = selectedDateStr;
                 await fetchUserData(currentUser);
+                startMultiDeviceSync();
             } else {
                 getDom('login-wrapper').style.display = 'flex';
                 getDom('main-wrapper').style.display = 'none';
+                stopMultiDeviceSync();
             }
         }
 
