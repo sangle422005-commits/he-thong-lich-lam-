@@ -235,18 +235,26 @@
 </head>
 <body>
 
-    <!-- USER LOGIN -->
+    <!-- USER LOGIN / REGISTER -->
     <div class="login-wrapper" id="login-wrapper">
         <div class="fluent-card">
             <div class="login-header">
                 <i class="fa-solid fa-shield-halved"></i>
-                <h2>XÁC THỰC BẢO MẬT</h2>
-                <p style="color: var(--text-sub); font-size: 0.85rem;">Nhập danh tính để truy cập hệ thống server</p>
+                <h2 id="auth-title">XÁC THỰC BẢO MẬT</h2>
+                <p style="color: var(--text-sub); font-size: 0.85rem;" id="auth-sub">Nhập thông tin để truy cập hệ thống</p>
             </div>
+            
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <button class="chart-btn active" id="tab-login-btn" onclick="switchAuthTab('login')" style="flex: 1;">Đăng Nhập</button>
+                <button class="chart-btn" id="tab-register-btn" onclick="switchAuthTab('register')" style="flex: 1;">Đăng Ký</button>
+            </div>
+
             <div class="input-form">
-                <input type="text" id="login-username" class="input-field" placeholder="Nhập tên người dùng (VD: Thu, Nam...)">
-                <button class="btn-add" style="margin-top: 8px;" onclick="handleLogin()">
-                    Đăng Nhập Server <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                <input type="text" id="login-username" class="input-field" placeholder="Tên người dùng (VD: Thu, Nam...)">
+                <input type="password" id="login-password" class="input-field" placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)">
+                
+                <button class="btn-add" id="auth-submit-btn" style="margin-top: 8px;" onclick="handleAuthSubmit()">
+                    Đăng Nhập <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
             </div>
         </div>
@@ -260,7 +268,7 @@
             <!-- ACCOUNT PANEL -->
             <div class="fluent-card user-panel">
                 <h2 id="welcome-title"><i class="fa-solid fa-circle-user" style="color: var(--accent-primary);"></i> Xin chào</h2>
-                <p>Hệ thống Server Quản lý Thời gian & Hiệu suất</p>
+                <p>Hệ thống Quản lý Thời gian & Hiệu suất</p>
                 <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
             </div>
 
@@ -476,6 +484,7 @@
         let currentPeriod = 'week';
         let perfChart = null;
         let currentTheme = 'dark';
+        let authMode = 'login'; // 'login' or 'register'
         
         let alertedTasks = {}; 
         let currentDetailTaskId = null;
@@ -512,6 +521,61 @@
             startClockLoop();
             renderIconPicker();
         };
+
+        /* AUTHENTICATION TAB & SUBMISSION HANDLERS */
+        function switchAuthTab(mode) {
+            authMode = mode;
+            const loginBtn = getDom('tab-login-btn');
+            const regBtn = getDom('tab-register-btn');
+            const submitBtn = getDom('auth-submit-btn');
+            const subTitle = getDom('auth-sub');
+
+            if (mode === 'login') {
+                loginBtn.classList.add('active');
+                regBtn.classList.remove('active');
+                submitBtn.innerHTML = 'Đăng Nhập <i class="fa-solid fa-arrow-right-to-bracket"></i>';
+                subTitle.innerText = 'Nhập thông tin để truy cập hệ thống';
+            } else {
+                regBtn.classList.add('active');
+                loginBtn.classList.remove('active');
+                submitBtn.innerHTML = 'Tạo Tài Khoản <i class="fa-solid fa-user-plus"></i>';
+                subTitle.innerText = 'Tạo tài khoản mới để lưu trữ dữ liệu';
+            }
+        }
+
+        async function handleAuthSubmit() {
+            const username = getDom('login-username').value.trim();
+            const password = getDom('login-password').value;
+
+            if (!username || !password) {
+                alert('Vui lòng nhập đầy đủ tên người dùng và mật khẩu!');
+                return;
+            }
+
+            const endpoint = authMode === 'login' ? '/api/login' : '/api/register';
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    currentUser = data.username;
+                    sessionStorage.setItem('logged_in_user', currentUser);
+                    getDom('login-username').value = '';
+                    getDom('login-password').value = '';
+                    checkAuth();
+                } else {
+                    alert(data.error || 'Thao tác thất bại!');
+                }
+            } catch (err) {
+                alert('Không thể kết nối đến Server Render!');
+            }
+        }
 
         /* SERVER API CALLS */
         async function fetchUserData(username) {
@@ -594,31 +658,6 @@
             } else {
                 getDom('login-wrapper').style.display = 'flex';
                 getDom('main-wrapper').style.display = 'none';
-            }
-        }
-
-        async function handleLogin() {
-            const nameInput = getDom('login-username').value.trim();
-            if (!nameInput) { alert('Vui lòng nhập tên người dùng!'); return; }
-
-            try {
-                const res = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: nameInput })
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    currentUser = data.username;
-                    sessionStorage.setItem('logged_in_user', currentUser);
-                    getDom('login-username').value = '';
-                    checkAuth();
-                } else {
-                    alert('Lỗi đăng nhập server!');
-                }
-            } catch (err) {
-                alert('Không thể kết nối đến Server Render!');
             }
         }
 
