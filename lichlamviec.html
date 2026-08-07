@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hệ Thống Quản Lý Công Việc & Hiệu Suất Thông Minh</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -21,81 +21,153 @@
             --text-sub: #94a3b8;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg-gradient); background-attachment: fixed; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 25px 15px; color: var(--text-main); }
+        /* Mobile & Low-End PC Performance Reset */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            text-rendering: optimizeSpeed;
+        }
+
+        body { 
+            background: var(--bg-gradient); 
+            background-attachment: fixed; 
+            min-height: 100vh; 
+            color: var(--text-main); 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            padding: 20px; 
+        }
 
         /* --- WRAPPERS --- */
-        .login-wrapper { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.6s ease; }
-        .main-wrapper { width: 100%; max-width: 680px; display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.6s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .login-wrapper { width: 100%; max-width: 400px; margin-top: 80px; display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease; }
+        .main-wrapper { width: 100%; max-width: 1200px; display: none; gap: 24px; animation: fadeIn 0.3s ease; flex-direction: row; align-items: flex-start; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- LAYOUT 2 CỘT --- */
+        .sidebar-left { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 20px; }
+        .workspace-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 
         /* --- CINEMATIC CARD BASE --- */
-        .cinematic-card { background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 22px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; }
-        .cinematic-card:hover { border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.15); }
+        .cinematic-card { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); 
+            border-radius: 20px; 
+            padding: 22px; 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1); 
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s; 
+            overflow: hidden; 
+            contain: layout style paint;
+            transform: translate3d(0, 0, 0); /* Hardware GPU Layering for low-end PC & mobile */
+            -webkit-transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+        }
+        @media (hover: hover) {
+            .cinematic-card:hover { border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.15); }
+        }
 
-        /* --- WEB HEADER --- */
-        .site-header { text-align: center; padding: 10px 0; position: relative; }
-        .site-header h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: 1px; background: linear-gradient(90deg, #38bdf8, #a855f7, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
-        .site-header p { font-size: 0.9rem; color: var(--text-sub); }
-        .btn-logout { position: absolute; top: 10px; right: 0; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.3s; }
-        .btn-logout:hover { background: #ef4444; color: #fff; }
+        /* --- SIDEBAR COMPONENTS --- */
+        .user-panel { text-align: center; position: relative; }
+        .user-panel h2 { font-size: 1.25rem; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
+        .user-panel p { font-size: 0.8rem; color: var(--text-sub); }
+        .btn-logout { margin-top: 12px; width: 100%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: background 0.2s, color 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-logout:active, .btn-logout:hover { background: #ef4444; color: #fff; }
+
+        /* --- DROPDOWN CONTROL --- */
+        .dropdown-menu-card { background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(56, 189, 248, 0.15)); border: 1px solid rgba(168, 85, 247, 0.3); }
+        .dropdown-label { font-size: 0.85rem; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        
+        .function-dropdown { 
+            width: 100%; 
+            background: rgba(15, 23, 42, 0.9); 
+            border: 1px solid var(--accent-cyan); 
+            color: #fff; 
+            padding: 12px 14px; 
+            border-radius: 12px; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            outline: none; 
+            cursor: pointer; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .function-dropdown:focus { border-color: var(--accent-purple); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+        .function-dropdown option { background: #0f172a; color: #fff; padding: 10px; }
+
+        /* --- CLOCK CARD --- */
+        .clock-card { text-align: center; padding: 16px; background: rgba(0,0,0,0.2); }
+        .clock-time { font-size: 2.2rem; font-weight: 800; letter-spacing: 2px; background: linear-gradient(90deg, #38bdf8, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-variant-numeric: tabular-nums; }
+        .clock-date { color: var(--text-sub); font-size: 0.85rem; margin-top: 2px; }
+
+        /* --- DATE NAVIGATOR --- */
+        .date-nav { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: rgba(0, 0, 0, 0.25); padding: 8px; border-radius: 12px; border: 1px solid var(--glass-border); }
+        .date-nav-btn { background: rgba(255, 255, 255, 0.08); border: none; color: var(--text-main); padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.2s; font-size: 0.8rem; }
+        .date-nav-btn:active, .date-nav-btn:hover { background: var(--accent-purple); }
+        .date-picker-input { background: transparent; border: none; color: var(--accent-cyan); font-weight: 700; font-size: 0.9rem; cursor: pointer; outline: none; text-align: center; width: 120px; }
 
         /* --- LOGIN SCREEN --- */
         .login-header { text-align: center; margin-bottom: 25px; }
         .login-header i { font-size: 2.5rem; color: var(--accent-purple); margin-bottom: 10px; }
 
-        /* --- ACCORDION --- */
+        /* --- ACCORDION & CARDS --- */
         .card-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
         .card-title { font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 12px; background: linear-gradient(90deg, #ffffff, var(--accent-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .toggle-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: center; color: var(--text-sub); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .toggle-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: center; color: var(--text-sub); transition: transform 0.25s ease; }
         .cinematic-card.collapsed .toggle-icon { transform: rotate(-90deg); }
-        .card-body { max-height: 1800px; opacity: 1; margin-top: 18px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .card-body { max-height: 1800px; opacity: 1; margin-top: 18px; transition: max-height 0.25s ease, opacity 0.25s ease; }
         .cinematic-card.collapsed .card-body { max-height: 0; opacity: 0; margin-top: 0; pointer-events: none; }
-
-        /* --- CLOCK CARD --- */
-        .clock-card { background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%); border: 1px solid rgba(56, 189, 248, 0.2); text-align: center; padding: 18px; }
-        .clock-time { font-size: 2.6rem; font-weight: 700; letter-spacing: 2px; background: linear-gradient(90deg, #38bdf8, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 25px rgba(56, 189, 248, 0.3); font-variant-numeric: tabular-nums; }
-        .clock-date { color: var(--text-sub); font-size: 0.9rem; margin-top: 4px; }
-
-        /* --- DATE NAVIGATOR --- */
-        .date-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 15px; background: rgba(0, 0, 0, 0.2); padding: 10px 14px; border-radius: 14px; border: 1px solid var(--glass-border); }
-        .date-nav-btn { background: rgba(255, 255, 255, 0.08); border: none; color: var(--text-main); padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; }
-        .date-nav-btn:hover { background: var(--accent-purple); }
-        .date-picker-input { background: transparent; border: none; color: var(--accent-cyan); font-weight: 700; font-size: 1rem; cursor: pointer; outline: none; text-align: center; }
 
         /* --- CHIPS & FORMS --- */
         .suggestion-header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .suggestion-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
-        .sug-chip { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); padding: 10px 12px; border-radius: 12px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; transition: all 0.3s ease; }
-        .sug-chip:hover { background: rgba(168, 85, 247, 0.15); border-color: var(--accent-purple); transform: translateY(-2px); }
-        .sug-chip-del { color: #ef4444; font-size: 0.8rem; opacity: 0.5; padding: 2px 4px; transition: opacity 0.2s; }
+        .suggestion-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+        .sug-chip { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); padding: 10px 12px; border-radius: 12px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; transition: transform 0.15s, background 0.15s; contain: content; }
+        .sug-chip:active, .sug-chip:hover { background: rgba(168, 85, 247, 0.2); transform: translateY(-2px); }
+        .sug-chip-del { color: #ef4444; font-size: 0.85rem; opacity: 0.6; padding: 2px 4px; transition: opacity 0.2s; }
         .sug-chip-del:hover { opacity: 1; }
-        .btn-custom-sug { background: rgba(56, 189, 248, 0.15); border: 1px dashed var(--accent-cyan); color: var(--accent-cyan); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s; }
+        .btn-custom-sug { background: rgba(56, 189, 248, 0.15); border: 1px dashed var(--accent-cyan); color: var(--accent-cyan); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: background 0.2s; }
         
         .input-form { display: flex; flex-direction: column; gap: 12px; }
         .input-row { display: flex; gap: 10px; flex-wrap: wrap; }
-        .input-field { background: rgba(0, 0, 0, 0.25); border: 1px solid var(--glass-border); color: var(--text-main); padding: 12px 14px; border-radius: 10px; font-size: 0.95rem; outline: none; transition: all 0.3s; width: 100%; }
-        .input-field:focus { border-color: var(--accent-cyan); box-shadow: 0 0 12px rgba(56, 189, 248, 0.2); }
-        .input-row input[type="text"].input-field { flex: 2; min-width: 200px; }
-        .input-row select.input-field, .input-row input[type="time"].input-field { flex: 1; min-width: 120px; cursor: pointer; }
+        .input-field { background: rgba(0, 0, 0, 0.25); border: 1px solid var(--glass-border); color: var(--text-main); padding: 12px 14px; border-radius: 10px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; width: 100%; }
+        .input-field:focus { border-color: var(--accent-cyan); }
+        .input-row input[type="text"].input-field { flex: 2; min-width: 180px; }
+        .input-row select.input-field, .input-row input[type="time"].input-field { flex: 1; min-width: 110px; cursor: pointer; }
         select.input-field option { background: #1e1b4b; color: #fff; }
-        .btn-add { background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-add:hover { opacity: 0.9; transform: scale(1.02); box-shadow: 0 5px 15px rgba(168, 85, 247, 0.3); }
+        .btn-add { background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: opacity 0.2s, transform 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-add:active, .btn-add:hover { opacity: 0.9; transform: scale(1.01); }
 
         /* --- PROGRESS BARS --- */
         .pb-container { background: rgba(255,255,255,0.1); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; }
-        .pb-fill { background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); height: 100%; width: 0%; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 0 10px var(--accent-cyan); }
+        .pb-fill { background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); height: 100%; width: 0%; transition: width 0.25s ease-out; }
         .daily-pb-wrap { margin-bottom: 20px; background: rgba(0,0,0,0.15); padding: 12px 15px; border-radius: 12px; border: 1px solid var(--glass-border); }
 
         /* --- TASK LIST --- */
-        .task-list { list-style: none; max-height: 450px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-top: 15px; padding-right: 5px;}
+        .task-list { 
+            list-style: none; 
+            max-height: 480px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            margin-top: 15px; 
+            padding-right: 5px; 
+            contain: layout style paint;
+            -webkit-overflow-scrolling: touch;
+        }
         .task-list::-webkit-scrollbar { width: 5px; }
-        .task-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+        .task-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
 
-        .task-item { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.3s; }
-        .task-item:hover { background: rgba(255, 255, 255, 0.08); transform: translateX(4px); }
+        .task-item { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: transform 0.15s, background 0.15s; contain: content; }
+        .task-item:active, .task-item:hover { background: rgba(255, 255, 255, 0.08); }
         .task-left { display: flex; align-items: center; gap: 12px; flex: 1; }
-        .task-checkbox { width: 18px; height: 18px; accent-color: var(--accent-cyan); cursor: pointer; }
+        .task-checkbox { width: 20px; height: 20px; accent-color: var(--accent-cyan); cursor: pointer; }
         .task-info { display: flex; flex-direction: column; gap: 6px; width: 100%; cursor: pointer; padding: 5px 0;}
         .task-text { font-size: 1.05rem; color: var(--text-main); font-weight: 500;}
         .task-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -109,16 +181,16 @@
         .task-item.completed .task-text { text-decoration: line-through; color: var(--text-sub); }
         .task-item.completed { opacity: 0.55; }
         
-        /* Action Buttons in Task List */
+        /* Action Buttons */
         .task-actions { display: flex; gap: 8px; align-items: center; }
-        .btn-action { background: none; border: none; cursor: pointer; padding: 8px; font-size: 1.1rem; opacity: 0.7; transition: all 0.2s; border-radius: 8px; }
+        .btn-action { background: none; border: none; cursor: pointer; padding: 8px; font-size: 1.1rem; opacity: 0.8; transition: transform 0.15s, background 0.15s; border-radius: 8px; }
         .btn-action.focus { color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); }
-        .btn-action.focus:hover { opacity: 1; transform: scale(1.1); background: var(--accent-cyan); color: #000; box-shadow: 0 0 10px var(--accent-cyan);}
+        .btn-action.focus:hover, .btn-action.focus:active { opacity: 1; transform: scale(1.08); background: var(--accent-cyan); color: #000; }
         .btn-action.delete { color: #f87171; background: rgba(248, 113, 113, 0.1); }
-        .btn-action.delete:hover { opacity: 1; transform: scale(1.1); background: #f87171; color: #fff; }
+        .btn-action.delete:hover, .btn-action.delete:active { opacity: 1; transform: scale(1.08); background: #f87171; color: #fff; }
 
         /* --- REAL-TIME STATUS --- */
-        .status-tracker { font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s;}
+        .status-tracker { font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
         .st-future { background: rgba(255,255,255,0.1); color: var(--text-sub); }
         .st-upcoming { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.4); }
         .st-ongoing { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
@@ -129,7 +201,7 @@
 
         /* --- ANALYTICS SECTION --- */
         .chart-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .chart-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text-sub); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: all 0.3s; font-weight: 600;}
+        .chart-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text-sub); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: background 0.2s, color 0.2s; font-weight: 600;}
         .chart-btn.active, .chart-btn:hover { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); }
         .stats-grid { display: flex; gap: 10px; margin-bottom: 20px; }
         .stat-box { flex: 1; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px 10px; text-align: center; }
@@ -142,80 +214,106 @@
         .deep-analysis-box li i { margin-top: 4px; }
 
         /* --- MODALS & TOASTS --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
-        .modal-overlay.show { display: flex; opacity: 1; }
-        .modal-content { background: var(--bg-gradient); width: 100%; max-width: 480px; padding: 25px; border-radius: 20px; border: 1px solid var(--glass-border); box-shadow: 0 25px 50px rgba(0,0,0,0.5); transform: translateY(20px); transition: transform 0.3s ease; display: flex; flex-direction: column; }
-        .modal-overlay.show .modal-content { transform: translateY(0); }
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.7); 
+            backdrop-filter: blur(5px); 
+            -webkit-backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; 
+            z-index: 1000; padding: 20px; opacity: 0; 
+            transition: opacity 0.2s ease; 
+        }
+        .modal-overlay.show { display: flex; opacity: 1; will-change: opacity; }
+        .modal-content { 
+            background: var(--bg-gradient); width: 100%; max-width: 480px; padding: 25px; 
+            border-radius: 20px; border: 1px solid var(--glass-border); 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5); 
+            transform: translateY(15px) translate3d(0,0,0); 
+            transition: transform 0.2s ease; 
+            display: flex; flex-direction: column; 
+        }
+        .modal-overlay.show .modal-content { transform: translateY(0) translate3d(0,0,0); }
         .modal-content h3 { color: #fff; margin-bottom: 15px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
-        .icon-picker-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 15px 0; max-height: 200px; overflow-y: auto; padding-right: 5px; }
-        .icon-option { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 10px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; color: var(--text-main); cursor: pointer; transition: all 0.2s; }
-        .icon-option:hover { background: rgba(56, 189, 248, 0.2); transform: scale(1.1); }
-        .icon-option.active { background: var(--accent-cyan); color: #000; border-color: #fff; box-shadow: 0 0 10px var(--accent-cyan); }
+        .icon-picker-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 15px 0; max-height: 200px; overflow-y: auto; padding-right: 5px; -webkit-overflow-scrolling: touch; }
+        .icon-option { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 10px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; color: var(--text-main); cursor: pointer; transition: transform 0.15s, background 0.15s; }
+        .icon-option:hover, .icon-option:active { background: rgba(56, 189, 248, 0.2); transform: scale(0.95); }
+        .icon-option.active { background: var(--accent-cyan); color: #000; border-color: #fff; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .btn-cancel { background: transparent; border: 1px solid var(--glass-border); color: var(--text-main); padding: 10px 18px; border-radius: 8px; cursor: pointer; }
-        .subtask-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--glass-border); border-radius: 8px; margin-bottom: 8px;}
+        .subtask-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--glass-border); border-radius: 8px; margin-bottom: 8px; contain: content; }
         .subtask-item.done span { text-decoration: line-through; color: var(--text-sub); }
         .empty-state { text-align: center; color: var(--text-sub); padding: 20px 0; font-size: 0.9rem; }
         
         .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none;}
-        .toast { background: rgba(15, 23, 42, 0.9); border-left: 4px solid var(--accent-cyan); padding: 15px 20px; border-radius: 8px; color: white; min-width: 250px; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px;}
-        .toast.show { transform: translateX(0); }
+        .toast { 
+            background: rgba(15, 23, 42, 0.95); border-left: 4px solid var(--accent-cyan); padding: 15px 20px; border-radius: 8px; color: white; min-width: 250px; 
+            transform: translateX(120%) translate3d(0,0,0); 
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            display: flex; align-items: center; gap: 12px;
+        }
+        .toast.show { transform: translateX(0) translate3d(0,0,0); }
         .toast-icon { font-size: 1.5rem; }
         .toast.t-warning { border-left-color: #facc15; }
         .toast.t-warning .toast-icon { color: #facc15; }
         .toast.t-danger { border-left-color: #ef4444; }
         .toast.t-danger .toast-icon { color: #ef4444; }
 
-        /* ================= FOCUS MODE OVERLAY (MỚI) ================= */
+        /* FOCUS MODE OVERLAY */
         .focus-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.98); 
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             display: none; justify-content: center; align-items: center;
-            z-index: 9999; opacity: 0; transition: opacity 0.5s ease;
+            z-index: 9999; opacity: 0; transition: opacity 0.25s ease;
         }
-        .focus-overlay.show { display: flex; opacity: 1; }
+        .focus-overlay.show { display: flex; opacity: 1; will-change: opacity; }
         .focus-close-btn {
-            position: absolute; top: 30px; right: 40px;
+            position: absolute; top: 20px; right: 20px;
             background: rgba(255,255,255,0.1); border: none; color: var(--text-sub);
-            width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem;
-            cursor: pointer; transition: 0.3s;
+            width: 44px; height: 44px; border-radius: 50%; font-size: 1.3rem;
+            cursor: pointer; transition: transform 0.15s, background 0.15s;
         }
-        .focus-close-btn:hover { color: #fff; background: #ef4444; transform: rotate(90deg); }
+        .focus-close-btn:hover, .focus-close-btn:active { color: #fff; background: #ef4444; transform: rotate(90deg); }
         .focus-content { text-align: center; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 700px; padding: 20px;}
-        
         .focus-badge { background: rgba(56, 189, 248, 0.2); color: var(--accent-cyan); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-bottom: 20px; letter-spacing: 1px;}
-        #focus-task-name { color: #fff; font-size: 2.2rem; margin-bottom: 40px; font-weight: 700; line-height: 1.4;}
-        
+        #focus-task-name { color: #fff; font-size: 1.8rem; margin-bottom: 30px; font-weight: 700; line-height: 1.3;}
         .focus-timer-display {
-            font-size: 9rem; font-weight: 800; font-variant-numeric: tabular-nums;
+            font-size: 6rem; font-weight: 800; font-variant-numeric: tabular-nums;
             background: linear-gradient(135deg, #38bdf8, #a855f7);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 40px; filter: drop-shadow(0 10px 20px rgba(168,85,247,0.3));
+            margin-bottom: 30px; filter: drop-shadow(0 10px 20px rgba(168,85,247,0.3));
             line-height: 1;
         }
-        
-        .focus-time-options { display: flex; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center;}
+        .focus-time-options { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center;}
         .f-opt-btn {
             background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            color: var(--text-sub); padding: 10px 25px; border-radius: 30px;
-            font-size: 1rem; cursor: pointer; transition: 0.3s; font-weight: 600;
+            color: var(--text-sub); padding: 10px 20px; border-radius: 30px;
+            font-size: 0.9rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600;
         }
-        .f-opt-btn.active, .f-opt-btn:hover { background: rgba(56,189,248,0.2); color: #fff; border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(56,189,248,0.3);}
-        
-        .focus-controls { display: flex; gap: 20px; }
+        .f-opt-btn.active, .f-opt-btn:hover, .f-opt-btn:active { background: rgba(56,189,248,0.2); color: #fff; border-color: var(--accent-cyan); }
+        .focus-controls { display: flex; gap: 15px; }
         .f-ctrl-btn {
-            border: none; padding: 18px 45px; border-radius: 40px; font-size: 1.2rem;
-            font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px;
+            border: none; padding: 16px 36px; border-radius: 40px; font-size: 1.1rem;
+            font-weight: 700; cursor: pointer; transition: transform 0.15s, background 0.15s; display: flex; align-items: center; gap: 10px;
         }
         .f-ctrl-btn.play { background: var(--text-main); color: #0f172a; box-shadow: 0 10px 20px rgba(255,255,255,0.2); }
-        .f-ctrl-btn.play:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(255,255,255,0.4); }
+        .f-ctrl-btn.play:hover, .f-ctrl-btn.play:active { transform: scale(0.98); }
         .f-ctrl-btn.stop { background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid var(--glass-border); }
-        .f-ctrl-btn.stop:hover { background: rgba(255,255,255,0.2); }
+        .f-ctrl-btn.stop:hover, .f-ctrl-btn.stop:active { background: rgba(255,255,255,0.2); }
+
+        /* RESPONSIVE LAYOUT */
+        @media (max-width: 850px) {
+            body { padding: 12px; }
+            .main-wrapper { flex-direction: column; gap: 16px; }
+            .sidebar-left { width: 100%; position: static; gap: 14px; }
+            .cinematic-card { padding: 18px; border-radius: 16px; }
+            .focus-timer-display { font-size: 4.8rem; }
+        }
     </style>
 </head>
 <body>
 
+    <!-- ĐĂNG NHẬP -->
     <div class="login-wrapper" id="login-wrapper">
         <div class="cinematic-card">
             <div class="login-header">
@@ -232,142 +330,164 @@
         </div>
     </div>
 
+    <!-- MAIN APP STRUCTURE -->
     <div class="main-wrapper" id="main-wrapper">
-        <header class="site-header">
-            <h1 id="welcome-title"><i class="fa-solid fa-chart-line"></i> Xin chào!</h1>
-            <p>Hệ thống Quản lý Thời gian & Đánh giá Hiệu suất</p>
-            <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Thoát</button>
-        </header>
-
-        <div class="cinematic-card clock-card">
-            <div class="clock-time" id="clock-time">00:00:00</div>
-            <div class="clock-date" id="clock-date">Đang tải...</div>
-        </div>
-
-        <div class="cinematic-card" id="sug-card">
-            <div class="card-header" onclick="toggleCard('sug-card')">
-                <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-purple);"></i> Gợi Ý Công Việc</div>
-                <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
+        
+        <!-- SIDEBAR BÊN TRÁI -->
+        <aside class="sidebar-left">
+            <!-- TÀI KHOẢN -->
+            <div class="cinematic-card user-panel">
+                <h2 id="welcome-title"><i class="fa-solid fa-hand-sparkles" style="color:#fcd34d;"></i> Xin chào!</h2>
+                <p>Hệ thống Quản lý & Hiệu suất</p>
+                <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Đăng xuất</button>
             </div>
-            <div class="card-body">
-                <div class="suggestion-header-actions">
-                    <span style="font-size: 0.85rem; color: var(--text-sub);">Bấm vào thẻ để điền nhanh:</span>
-                    <button class="btn-custom-sug" onclick="openIconModal()"><i class="fa-solid fa-plus"></i> Tạo gợi ý mới</button>
-                </div>
-                <div class="suggestion-grid" id="suggestion-grid"></div>
-            </div>
-        </div>
 
-        <div class="cinematic-card" id="task-main-card">
-            <div class="card-header" onclick="toggleCard('task-main-card')">
-                <div class="card-title"><i class="fa-solid fa-list-check" style="color: var(--accent-cyan);"></i> Danh Sách Công Việc</div>
-                <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
+            <!-- DANH SÁCH THẢ XUỐNG (DROPDOWN CHỌN CHỨC NĂNG) -->
+            <div class="cinematic-card dropdown-menu-card">
+                <div class="dropdown-label"><i class="fa-solid fa-bars-staggered"></i> Chọn Chức Năng</div>
+                <select id="function-dropdown" class="function-dropdown" onchange="switchFunctionView(this.value)">
+                    <option value="all">🌟 Tất cả chức năng</option>
+                    <option value="task-main-card" selected>📝 Danh sách Công việc</option>
+                    <option value="sug-card">🪄 Gợi ý Công việc nhanh</option>
+                    <option value="analytics-card">📊 Phân tích Hiệu suất</option>
+                </select>
             </div>
-            
-            <div class="card-body">
+
+            <!-- ĐỒNG HỒ -->
+            <div class="cinematic-card clock-card">
+                <div class="clock-time" id="clock-time">00:00:00</div>
+                <div class="clock-date" id="clock-date">Đang tải...</div>
+            </div>
+
+            <!-- BỘ CHỌN NGÀY LÀM VIỆC -->
+            <div class="cinematic-card" style="padding: 14px;">
                 <div class="date-nav">
-                    <button class="date-nav-btn" onclick="changeDate(-1)"><i class="fa-solid fa-chevron-left"></i> Hôm trước</button>
+                    <button class="date-nav-btn" onclick="changeDate(-1)"><i class="fa-solid fa-chevron-left"></i> Trước</button>
                     <input type="date" id="current-date-picker" class="date-picker-input" onchange="onDateSelect(this.value)">
-                    <button class="date-nav-btn" onclick="changeDate(1)">Hôm sau <i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-
-                <div class="daily-pb-wrap">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
-                        <span style="color: var(--text-main); font-weight: 500;">Tiến độ hôm nay:</span>
-                        <span id="daily-progress-text" style="color: var(--accent-cyan); font-weight: 700;">0% (0/0)</span>
-                    </div>
-                    <div class="pb-container" style="height: 8px;">
-                        <div class="pb-fill" id="daily-progress-bar"></div>
-                    </div>
-                </div>
-
-                <div class="input-form">
-                    <input type="text" id="task-input" class="input-field" placeholder="Nhập tên công việc lớn...">
-                    <div class="input-row">
-                        <select id="task-priority" class="input-field">
-                            <option value="high">🔴 Quan trọng & Gấp</option>
-                            <option value="medium" selected>🟡 Trung bình</option>
-                            <option value="low">🟢 Thấp / Thong thả</option>
-                        </select>
-                        <select id="task-repeat" class="input-field">
-                            <option value="none" selected>🔄 Không lặp lại</option>
-                            <option value="daily">📅 Hằng ngày</option>
-                            <option value="weekly">📆 Hằng tuần</option>
-                        </select>
-                    </div>
-                    <div class="input-row">
-                        <input type="time" id="task-start-time" class="input-field" title="Giờ bắt đầu">
-                        <span style="align-self: center; color: var(--text-sub); font-size: 0.85rem;">đến</span>
-                        <input type="time" id="task-end-time" class="input-field" title="Giờ kết thúc">
-                        <button id="add-btn" class="btn-add" onclick="addTask()"><i class="fa-solid fa-plus"></i> Thêm</button>
-                    </div>
-                </div>
-
-                <ul class="task-list" id="task-list"></ul>
-            </div>
-        </div>
-
-        <div class="cinematic-card" id="analytics-card">
-            <div class="card-header" onclick="toggleCard('analytics-card')">
-                <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: #f43f5e;"></i> Phân Tích Hiệu Suất</div>
-                <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
-            </div>
-
-            <div class="card-body">
-                <div class="chart-controls">
-                    <button class="chart-btn active" onclick="switchChartPeriod('week', this)">7 Ngày Qua</button>
-                    <button class="chart-btn" onclick="switchChartPeriod('month', this)">4 Tuần Qua</button>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <span class="s-val" id="kpi-total">0</span>
-                        <span class="s-lbl">Tổng Số Việc</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="s-val" id="kpi-done" style="color:#10b981;">0</span>
-                        <span class="s-lbl">Đã Hoàn Thành</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="s-val" id="kpi-rate" style="color:#a855f7;">0%</span>
-                        <span class="s-lbl">Tỷ Lệ Chung</span>
-                    </div>
-                </div>
-
-                <div style="position: relative; height: 260px; width: 100%;">
-                    <canvas id="performanceChart"></canvas>
-                </div>
-
-                <div class="deep-analysis-box">
-                    <h4><i class="fa-solid fa-brain"></i> Trợ Lý Phân Tích (AI Insight)</h4>
-                    <div id="deep-analysis-content"></div>
+                    <button class="date-nav-btn" onclick="changeDate(1)">Sau <i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
-        </div>
+        </aside>
+
+        <!-- WORKSPACE BÊN PHẢI -->
+        <main class="workspace-right">
+
+            <!-- 1. GỢI Ý CÔNG VIỆC -->
+            <div class="cinematic-card" id="sug-card">
+                <div class="card-header" onclick="toggleCard('sug-card')">
+                    <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-purple);"></i> Gợi Ý Công Việc Nhanh</div>
+                    <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="card-body">
+                    <div class="suggestion-header-actions">
+                        <span style="font-size: 0.85rem; color: var(--text-sub);">Bấm vào thẻ để điền nhanh công việc:</span>
+                        <button class="btn-custom-sug" onclick="openIconModal()"><i class="fa-solid fa-plus"></i> Tạo gợi ý mới</button>
+                    </div>
+                    <div class="suggestion-grid" id="suggestion-grid"></div>
+                </div>
+            </div>
+
+            <!-- 2. DANH SÁCH CÔNG VIỆC -->
+            <div class="cinematic-card" id="task-main-card">
+                <div class="card-header" onclick="toggleCard('task-main-card')">
+                    <div class="card-title"><i class="fa-solid fa-list-check" style="color: var(--accent-cyan);"></i> Danh Sách Công Việc</div>
+                    <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="daily-pb-wrap">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
+                            <span style="color: var(--text-main); font-weight: 500;">Tiến độ ngày đang chọn:</span>
+                            <span id="daily-progress-text" style="color: var(--accent-cyan); font-weight: 700;">0% (0/0)</span>
+                        </div>
+                        <div class="pb-container" style="height: 8px;">
+                            <div class="pb-fill" id="daily-progress-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="input-form">
+                        <input type="text" id="task-input" class="input-field" placeholder="Nhập tên công việc cần làm...">
+                        <div class="input-row">
+                            <select id="task-priority" class="input-field">
+                                <option value="high">🔴 Quan trọng & Gấp</option>
+                                <option value="medium" selected>🟡 Trung bình</option>
+                                <option value="low">🟢 Thấp / Thong thả</option>
+                            </select>
+                            <select id="task-repeat" class="input-field">
+                                <option value="none" selected>🔄 Không lặp lại</option>
+                                <option value="daily">📅 Hằng ngày</option>
+                                <option value="weekly">📆 Hằng tuần</option>
+                            </select>
+                        </div>
+                        <div class="input-row">
+                            <input type="time" id="task-start-time" class="input-field" title="Giờ bắt đầu">
+                            <span style="align-self: center; color: var(--text-sub); font-size: 0.85rem;">đến</span>
+                            <input type="time" id="task-end-time" class="input-field" title="Giờ kết thúc">
+                            <button id="add-btn" class="btn-add" onclick="addTask()"><i class="fa-solid fa-plus"></i> Thêm</button>
+                        </div>
+                    </div>
+
+                    <ul class="task-list" id="task-list"></ul>
+                </div>
+            </div>
+
+            <!-- 3. PHÂN TÍCH HIỆU SUẤT -->
+            <div class="cinematic-card" id="analytics-card">
+                <div class="card-header" onclick="toggleCard('analytics-card')">
+                    <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: #f43f5e;"></i> Phân Tích Hiệu Suất</div>
+                    <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+
+                <div class="card-body">
+                    <div class="chart-controls">
+                        <button class="chart-btn active" onclick="switchChartPeriod('week', this)">7 Ngày Qua</button>
+                        <button class="chart-btn" onclick="switchChartPeriod('month', this)">4 Tuần Qua</button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="s-val" id="kpi-total">0</span>
+                            <span class="s-lbl">Tổng Việc</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="s-val" id="kpi-done" style="color:#10b981;">0</span>
+                            <span class="s-lbl">Đã Hoàn Thành</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="s-val" id="kpi-rate" style="color:#a855f7;">0%</span>
+                            <span class="s-lbl">Tỷ Lệ Chung</span>
+                        </div>
+                    </div>
+
+                    <div style="position: relative; height: 260px; width: 100%;">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+
+                    <div class="deep-analysis-box">
+                        <h4><i class="fa-solid fa-brain"></i> Trợ Lý Phân Tích (AI Insight)</h4>
+                        <div id="deep-analysis-content"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
+    <!-- MODAL POPUPS -->
     <div id="focus-mode-overlay" class="focus-overlay">
         <button class="focus-close-btn" title="Thoát" onclick="closeFocusMode()"><i class="fa-solid fa-xmark"></i></button>
-        
         <div class="focus-content">
             <div class="focus-badge"><i class="fa-solid fa-crosshairs"></i> CHẾ ĐỘ TẬP TRUNG (POMODORO)</div>
             <h2 id="focus-task-name">Đang tải tên công việc...</h2>
-            
             <div class="focus-timer-display" id="focus-timer-display">25:00</div>
-            
             <div class="focus-time-options">
                 <button class="f-opt-btn" onclick="setFocusTime(15, this)">15 Phút</button>
                 <button class="f-opt-btn active" onclick="setFocusTime(25, this)">25 Phút (Chuẩn)</button>
                 <button class="f-opt-btn" onclick="setFocusTime(50, this)">50 Phút (Deep Work)</button>
             </div>
-
             <div class="focus-controls">
-                <button class="f-ctrl-btn play" id="focus-play-btn" onclick="toggleFocusTimer()">
-                    <i class="fa-solid fa-play"></i> Bắt đầu
-                </button>
-                <button class="f-ctrl-btn stop" onclick="resetFocusTimer()">
-                    <i class="fa-solid fa-rotate-right"></i> Làm lại
-                </button>
+                <button class="f-ctrl-btn play" id="focus-play-btn" onclick="toggleFocusTimer()"><i class="fa-solid fa-play"></i> Bắt đầu</button>
+                <button class="f-ctrl-btn stop" onclick="resetFocusTimer()"><i class="fa-solid fa-rotate-right"></i> Làm lại</button>
             </div>
         </div>
     </div>
@@ -404,18 +524,19 @@
 
             <hr style="border-color: var(--glass-border); margin-bottom: 15px;">
 
-            <div style="font-size: 0.95rem; font-weight: 600; margin-bottom: 10px;">Các bước nhỏ cần làm:</div>
+            <div style="font-size: 0.95rem; font-weight: 600; margin-bottom: 10px;">Các bước nhỏ cần làm (Subtasks):</div>
             <div class="input-form" style="flex-direction: row; gap: 8px;">
                 <input type="text" id="td-subtask-input" class="input-field" placeholder="Ví dụ: Bước 1..." style="flex: 1;">
                 <button class="btn-add" onclick="addSubtask()"><i class="fa-solid fa-plus"></i></button>
             </div>
 
-            <div id="td-subtask-list" style="margin-top: 15px; max-height: 250px; overflow-y: auto; padding-right: 5px;"></div>
+            <div id="td-subtask-list" style="margin-top: 15px; max-height: 250px; overflow-y: auto; padding-right: 5px; -webkit-overflow-scrolling: touch;"></div>
         </div>
     </div>
 
     <div id="toast-container" class="toast-container"></div>
 
+    <!-- SCRIPT TÍNH NĂNG -->
     <script>
         let currentUser = null;
         let tasks = [];
@@ -427,11 +548,21 @@
         let alertedTasks = {}; 
         let currentDetailTaskId = null;
 
-        // BIẾN CHO CHẾ ĐỘ TẬP TRUNG
+        // BIẾN POMODORO & TIMER CONTROL
         let focusInterval = null;
-        let focusTotalTime = 25 * 60; // Mặc định 25 phút
+        let focusTotalTime = 25 * 60;
         let focusTimeLeft = 25 * 60;
         let isFocusRunning = false;
+        let clockTimerId = null;
+
+        // DOM CACHE
+        const domCache = {};
+
+        // Single Reusable Web Audio Context instance
+        let audioCtxSingleton = null;
+
+        // GC Optimization - Reuse date object inside loop
+        let staticLoopDate = new Date();
 
         const defaultSuggestions = [
             { id: 1, text: 'Tập thể dục 30p', icon: 'fa-person-running', priority: 'high' },
@@ -447,36 +578,66 @@
         ];
         let selectedIcon = 'fa-star';
 
+        function getDom(id) {
+            if (!domCache[id]) {
+                domCache[id] = document.getElementById(id);
+            }
+            return domCache[id];
+        }
+
         /* KHỞI TẠO */
         window.onload = () => {
             checkAuth();
-            setInterval(runtimeLoop, 1000); 
+            startClockLoop();
             renderIconPicker();
         };
+
+        /* PAGE VISIBILITY API (Low-End PC & Mobile Energy Optimizer) */
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopClockLoop();
+            } else {
+                runtimeLoop();
+                startClockLoop();
+            }
+        });
+
+        function startClockLoop() {
+            if (!clockTimerId) {
+                clockTimerId = setInterval(runtimeLoop, 1000);
+            }
+        }
+
+        function stopClockLoop() {
+            if (clockTimerId) {
+                clearInterval(clockTimerId);
+                clockTimerId = null;
+            }
+        }
 
         function checkAuth() {
             currentUser = localStorage.getItem('logged_in_user');
             if (currentUser) {
-                document.getElementById('login-wrapper').style.display = 'none';
-                document.getElementById('main-wrapper').style.display = 'flex';
-                document.getElementById('welcome-title').innerHTML = `<i class="fa-solid fa-hand-sparkles" style="color:#fcd34d;"></i> Xin chào, ${currentUser}!`;
+                getDom('login-wrapper').style.display = 'none';
+                getDom('main-wrapper').style.display = 'flex';
+                getDom('welcome-title').innerHTML = `<i class="fa-solid fa-hand-sparkles" style="color:#fcd34d;"></i> Xin chào, ${currentUser}!`;
                 loadUserData();
-                document.getElementById('current-date-picker').value = selectedDateStr;
+                getDom('current-date-picker').value = selectedDateStr;
                 renderSuggestions();
                 renderTasks();
                 if (!perfChart) initChart(); else updateChart();
             } else {
-                document.getElementById('login-wrapper').style.display = 'flex';
-                document.getElementById('main-wrapper').style.display = 'none';
+                getDom('login-wrapper').style.display = 'flex';
+                getDom('main-wrapper').style.display = 'none';
             }
         }
 
         function handleLogin() {
-            const nameInput = document.getElementById('login-username').value.trim();
+            const nameInput = getDom('login-username').value.trim();
+            if (!nameInput) { alert('Vui lòng nhập tên!'); return; }
             const formattedName = nameInput.charAt(0).toUpperCase() + nameInput.slice(1);
-            if (formattedName === '') { alert('Vui lòng nhập tên!'); return; }
             localStorage.setItem('logged_in_user', formattedName);
-            document.getElementById('login-username').value = '';
+            getDom('login-username').value = '';
             checkAuth();
         }
 
@@ -486,6 +647,20 @@
                 alertedTasks = {};
                 checkAuth();
             }
+        }
+
+        /* ĐIỀU HƯỚNG VIEW TỪ DROPDOWN SIDEBAR */
+        function switchFunctionView(targetId) {
+            const cards = ['sug-card', 'task-main-card', 'analytics-card'];
+            cards.forEach(id => {
+                const el = getDom(id);
+                if (targetId === 'all' || id === targetId) {
+                    el.style.display = 'block';
+                    el.classList.remove('collapsed');
+                } else {
+                    el.style.display = 'none';
+                }
+            });
         }
 
         function loadUserData() {
@@ -498,18 +673,19 @@
             localStorage.setItem(`suggestions_${currentUser}`, JSON.stringify(suggestions));
         }
 
-        /* ENGINE THỜI GIAN */
+        /* TIME ENGINE */
         function runtimeLoop() {
             if(!currentUser) return;
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('clock-time').textContent = `${hours}:${minutes}:${seconds}`;
-            document.getElementById('clock-date').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            staticLoopDate.setTime(Date.now());
+            const hours = String(staticLoopDate.getHours()).padStart(2, '0');
+            const minutes = String(staticLoopDate.getMinutes()).padStart(2, '0');
+            const seconds = String(staticLoopDate.getSeconds()).padStart(2, '0');
+            
+            getDom('clock-time').textContent = `${hours}:${minutes}:${seconds}`;
+            getDom('clock-date').textContent = staticLoopDate.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            const todayStr = now.toISOString().split('T')[0];
-            if (selectedDateStr === todayStr) updateTaskTrackers(now);
+            const todayStr = staticLoopDate.toISOString().split('T')[0];
+            if (selectedDateStr === todayStr) updateTaskTrackers(staticLoopDate);
         }
 
         function updateTaskTrackers(nowObj) {
@@ -540,7 +716,10 @@
                 } else if (endMs && diffEnd <= 0) {
                     html = calculateLateness(diffEnd, task, "Kết thúc");
                 }
-                statusEl.innerHTML = html;
+
+                if (statusEl.innerHTML !== html) {
+                    statusEl.innerHTML = html;
+                }
             });
         }
 
@@ -557,83 +736,93 @@
                 return `<div class="status-tracker st-late-5"><i class="fa-regular fa-clock"></i> Trễ ${lateMins} phút</div>`;
             } else return `<div class="status-tracker st-late-5"><i class="fa-solid fa-exclamation"></i> Vừa trễ hạn</div>`;
         }
+
         function formatTimeText(totalMins) {
             if (totalMins < 60) return `${totalMins} phút`;
             return `${Math.floor(totalMins / 60)}h ${totalMins % 60}p`;
         }
 
-        /* TOAST */
+        /* TOAST NOTIFICATION */
         function triggerToast(taskId, level, title, msg, type) {
             const alertKey = `${taskId}_${level}`;
             if (!alertedTasks[alertKey]) { showToast(title, msg, type); alertedTasks[alertKey] = true; }
         }
         function showToast(title, message, type) {
-            const container = document.getElementById('toast-container');
+            const container = getDom('toast-container');
             const toast = document.createElement('div'); toast.className = `toast t-${type}`;
             let iconClass = type === 'warning' ? 'fa-exclamation-triangle' : (type === 'danger' ? 'fa-skull-crossbones' : 'fa-info-circle');
             toast.innerHTML = `<div class="toast-icon"><i class="fa-solid ${iconClass}"></i></div><div class="toast-content"><h4>${title}</h4><p>${message}</p></div>`;
             container.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 100);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 5000);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 250); }, 5000);
         }
 
-        /* GIAO DIỆN CHUNG */
-        function toggleCard(cardId) { document.getElementById(cardId).classList.toggle('collapsed'); }
+        /* CARD TOGGLE & MODALS */
+        function toggleCard(cardId) { getDom(cardId).classList.toggle('collapsed'); }
         function changeDate(offset) {
             let d = new Date(selectedDateStr); d.setDate(d.getDate() + offset);
             selectedDateStr = d.toISOString().split('T')[0];
-            document.getElementById('current-date-picker').value = selectedDateStr;
+            getDom('current-date-picker').value = selectedDateStr;
             renderTasks();
         }
         function onDateSelect(val) { if(val) { selectedDateStr = val; renderTasks(); } }
-        function openModal(id) { document.getElementById(id).classList.add('show'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        function openModal(id) { getDom(id).classList.add('show'); }
+        function closeModal(id) { getDom(id).classList.remove('show'); }
 
         /* GỢI Ý */
         function renderSuggestions() {
-            const grid = document.getElementById('suggestion-grid'); grid.innerHTML = '';
+            const grid = getDom('suggestion-grid');
+            let htmlStr = '';
             suggestions.forEach(sug => {
-                const chip = document.createElement('div'); chip.className = 'sug-chip';
-                chip.innerHTML = `<span onclick="fillSuggestionForm('${escapeHtml(sug.text)}', '${sug.priority}')" style="display:flex; align-items:center; gap:8px;"><i class="fa-solid ${sug.icon}"></i> ${escapeHtml(sug.text)}</span><i class="fa-solid fa-xmark sug-chip-del" onclick="deleteSuggestion(${sug.id}, event)"></i>`;
-                grid.appendChild(chip);
+                htmlStr += `<div class="sug-chip"><span onclick="fillSuggestionForm('${escapeHtml(sug.text)}', '${sug.priority}')" style="display:flex; align-items:center; gap:8px;"><i class="fa-solid ${sug.icon}"></i> ${escapeHtml(sug.text)}</span><i class="fa-solid fa-xmark sug-chip-del" onclick="deleteSuggestion(${sug.id}, event)"></i></div>`;
             });
+            grid.innerHTML = htmlStr;
         }
         function fillSuggestionForm(text, prio) {
-            document.getElementById('task-input').value = text; document.getElementById('task-priority').value = prio; document.getElementById('task-start-time').focus();
+            getDom('task-input').value = text; 
+            getDom('task-priority').value = prio; 
+            getDom('task-start-time').focus();
         }
         function renderIconPicker() {
-            const grid = document.getElementById('icon-picker-grid'); grid.innerHTML = '';
+            const grid = getDom('icon-picker-grid');
+            let htmlStr = '';
             iconLibrary.forEach(cls => {
-                const div = document.createElement('div'); div.className = `icon-option ${cls === selectedIcon ? 'active' : ''}`;
-                div.innerHTML = `<i class="fa-solid ${cls}"></i>`; div.onclick = () => { selectedIcon = cls; document.querySelectorAll('.icon-option').forEach(el=>el.classList.remove('active')); div.classList.add('active'); };
-                grid.appendChild(div);
+                htmlStr += `<div class="icon-option ${cls === selectedIcon ? 'active' : ''}" onclick="selectPickerIcon('${cls}', this)"><i class="fa-solid ${cls}"></i></div>`;
             });
+            grid.innerHTML = htmlStr;
         }
-        function openIconModal() { document.getElementById('modal-sug-text').value = ''; openModal('icon-modal'); }
+        function selectPickerIcon(cls, el) {
+            selectedIcon = cls;
+            document.querySelectorAll('.icon-option').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+        }
+        function openIconModal() { getDom('modal-sug-text').value = ''; openModal('icon-modal'); }
         function saveCustomSuggestion() {
-            const txt = document.getElementById('modal-sug-text').value.trim();
+            const txt = getDom('modal-sug-text').value.trim();
             if(!txt) return alert('Nhập tên!');
             suggestions.push({id: Date.now(), text: txt, icon: selectedIcon, priority: 'medium'});
             saveUserData(); renderSuggestions(); closeModal('icon-modal');
         }
         function deleteSuggestion(id, e) { e.stopPropagation(); suggestions = suggestions.filter(s=>s.id!==id); saveUserData(); renderSuggestions(); }
 
-        /* QUẢN LÝ CÔNG VIỆC */
-        document.getElementById('task-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
+        /* CÔNG VIỆC */
+        getDom('task-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
 
         function addTask() {
-            const text = document.getElementById('task-input').value.trim();
+            const text = getDom('task-input').value.trim();
             if(!text) return;
             tasks.push({
                 id: Date.now(), date: selectedDateStr, text: text,
-                priority: document.getElementById('task-priority').value,
-                repeat: document.getElementById('task-repeat').value,
-                startTime: document.getElementById('task-start-time').value || null,
-                endTime: document.getElementById('task-end-time').value || null,
+                priority: getDom('task-priority').value,
+                repeat: getDom('task-repeat').value,
+                startTime: getDom('task-start-time').value || null,
+                endTime: getDom('task-end-time').value || null,
                 completed: false, subtasks: []
             });
             saveUserData(); renderTasks(); updateChart();
-            document.getElementById('task-input').value = ''; document.getElementById('task-start-time').value = ''; document.getElementById('task-end-time').value = '';
+            getDom('task-input').value = ''; 
+            getDom('task-start-time').value = ''; 
+            getDom('task-end-time').value = '';
         }
 
         function toggleTask(id) { tasks = tasks.map(t=>t.id===id?{...t,completed:!t.completed}:t); saveUserData(); renderTasks(); updateChart(); }
@@ -659,26 +848,24 @@
 
         function renderTasks() {
             generateRecurringTasksForDate(selectedDateStr);
-            const list = document.getElementById('task-list'); list.innerHTML = '';
+            const list = getDom('task-list');
             const dayTasks = tasks.filter(t=>t.date===selectedDateStr);
             
-            // Tính toán Thanh tiến độ ngày
             let dayDoneCount = 0;
             if(dayTasks.length > 0) {
                 dayDoneCount = dayTasks.filter(t => t.completed).length;
                 let dailyRate = Math.round((dayDoneCount / dayTasks.length) * 100);
-                document.getElementById('daily-progress-bar').style.width = `${dailyRate}%`;
-                document.getElementById('daily-progress-text').innerText = `${dailyRate}% (${dayDoneCount}/${dayTasks.length})`;
+                getDom('daily-progress-bar').style.width = `${dailyRate}%`;
+                getDom('daily-progress-text').innerText = `${dailyRate}% (${dayDoneCount}/${dayTasks.length})`;
             } else {
-                document.getElementById('daily-progress-bar').style.width = `0%`;
-                document.getElementById('daily-progress-text').innerText = `0% (0/0)`;
+                getDom('daily-progress-bar').style.width = `0%`;
+                getDom('daily-progress-text').innerText = `0% (0/0)`;
             }
 
-            if(!dayTasks.length) { list.innerHTML = `<div class="empty-state">Không có công việc nào.</div>`; return; }
+            if(!dayTasks.length) { list.innerHTML = `<div class="empty-state">Không có công việc nào trong ngày này.</div>`; return; }
             
+            let listHtml = '';
             dayTasks.forEach(task => {
-                const li = document.createElement('li'); li.className = `task-item ${task.completed ? 'completed' : ''}`;
-                
                 let prioLbl = 'Trung bình', prioCls = 'badge-priority-medium';
                 if(task.priority==='high'){ prioLbl='Quan trọng'; prioCls='badge-priority-high';}
                 else if(task.priority==='low'){ prioLbl='Thấp'; prioCls='badge-priority-low';}
@@ -691,37 +878,39 @@
                     subBadge = `<span class="badge badge-subtask"><i class="fa-solid fa-layer-group"></i> ${doneSubs}/${task.subtasks.length}</span>`;
                 }
 
-                li.innerHTML = `
-                    <div class="task-left">
-                        <input type="checkbox" class="task-checkbox" ${task.completed?'checked':''} onclick="toggleTask(${task.id})">
-                        <div class="task-info" onclick="openTaskDetails(${task.id})">
-                            <span class="task-text">${escapeHtml(task.text)}</span>
-                            <div class="task-meta"><span class="badge ${prioCls}">${prioLbl}</span> ${timeHtml} ${subBadge} ${repHtml}</div>
-                            <div id="status-${task.id}" style="margin-top: 4px;"></div>
+                listHtml += `
+                    <li class="task-item ${task.completed ? 'completed' : ''}">
+                        <div class="task-left">
+                            <input type="checkbox" class="task-checkbox" ${task.completed?'checked':''} onclick="toggleTask(${task.id})">
+                            <div class="task-info" onclick="openTaskDetails(${task.id})">
+                                <span class="task-text">${escapeHtml(task.text)}</span>
+                                <div class="task-meta"><span class="badge ${prioCls}">${prioLbl}</span> ${timeHtml} ${subBadge} ${repHtml}</div>
+                                <div id="status-${task.id}" style="margin-top: 4px;"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="task-actions">
-                        <button class="btn-action focus" title="Chế độ Tập Trung" onclick="openFocusMode(${task.id})"><i class="fa-solid fa-stopwatch"></i></button>
-                        <button class="btn-action delete" title="Xóa" onclick="deleteTask(${task.id})"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
+                        <div class="task-actions">
+                            <button class="btn-action focus" title="Chế độ Tập Trung" onclick="openFocusMode(${task.id})"><i class="fa-solid fa-stopwatch"></i></button>
+                            <button class="btn-action delete" title="Xóa" onclick="deleteTask(${task.id})"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </li>
                 `;
-                list.appendChild(li);
             });
+            list.innerHTML = listHtml;
             updateTaskTrackers(new Date()); 
         }
 
-        /* ================== LỚP CHI TIẾT (SUB-TASKS) ================== */
-        document.getElementById('td-subtask-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addSubtask(); });
+        /* SUBTASKS */
+        getDom('td-subtask-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addSubtask(); });
 
         function openTaskDetails(taskId) {
             currentDetailTaskId = taskId;
             const task = tasks.find(t => t.id === taskId);
             if(!task) return;
-            document.getElementById('td-title').innerText = task.text;
+            getDom('td-title').innerText = task.text;
             let prioLbl = task.priority==='high' ? 'Quan trọng' : (task.priority==='low' ? 'Thấp' : 'Trung bình');
             let metaHtml = `<span class="badge badge-priority-${task.priority}">${prioLbl}</span>`;
             if(task.startTime) metaHtml += `<span class="time-badge"><i class="fa-regular fa-clock"></i> ${task.startTime} ${task.endTime ? '- '+task.endTime : ''}</span>`;
-            document.getElementById('td-meta').innerHTML = metaHtml;
+            getDom('td-meta').innerHTML = metaHtml;
             renderSubtasksModal();
             openModal('task-detail-modal');
         }
@@ -729,29 +918,32 @@
         function renderSubtasksModal() {
             const task = tasks.find(t => t.id === currentDetailTaskId);
             if(!task) return;
-            const list = document.getElementById('td-subtask-list'); list.innerHTML = '';
+            const list = getDom('td-subtask-list');
             const subs = task.subtasks || [];
             let doneCount = 0;
 
-            if(subs.length === 0) { list.innerHTML = `<div class="empty-state" style="font-size:0.85rem;">Chưa có bước nhỏ nào. Hãy thêm ở trên!</div>`; } 
-            else {
+            if(subs.length === 0) { 
+                list.innerHTML = `<div class="empty-state" style="font-size:0.85rem;">Chưa có bước nhỏ nào. Hãy thêm ở trên!</div>`; 
+            } else {
+                let htmlStr = '';
                 subs.forEach(sub => {
                     if(sub.completed) doneCount++;
-                    list.innerHTML += `
+                    htmlStr += `
                         <div class="subtask-item ${sub.completed ? 'done' : ''}">
                             <div style="display:flex; align-items:center; gap: 10px; cursor:pointer;" onclick="toggleSubtask(${sub.id})">
                                 <input type="checkbox" style="width:16px; height:16px; accent-color: var(--accent-purple);" ${sub.completed ? 'checked' : ''}>
                                 <span>${escapeHtml(sub.text)}</span>
                             </div>
-                            <i class="fa-solid fa-trash-can btn-delete" style="font-size:0.9rem;" onclick="deleteSubtask(${sub.id})"></i>
+                            <i class="fa-solid fa-trash-can btn-delete" style="font-size:0.9rem; color:#ef4444; cursor:pointer;" onclick="deleteSubtask(${sub.id})"></i>
                         </div>
                     `;
                 });
+                list.innerHTML = htmlStr;
             }
 
             let percent = subs.length > 0 ? Math.round((doneCount / subs.length) * 100) : (task.completed ? 100 : 0);
-            document.getElementById('td-progress-bar').style.width = `${percent}%`;
-            document.getElementById('td-progress-text').innerText = `${percent}%`;
+            getDom('td-progress-bar').style.width = `${percent}%`;
+            getDom('td-progress-text').innerText = `${percent}%`;
 
             if(subs.length > 0 && doneCount === subs.length && !task.completed) {
                 task.completed = true; saveUserData(); renderTasks(); updateChart();
@@ -761,7 +953,7 @@
         }
 
         function addSubtask() {
-            const input = document.getElementById('td-subtask-input'); const text = input.value.trim();
+            const input = getDom('td-subtask-input'); const text = input.value.trim();
             if(!text || !currentDetailTaskId) return;
             const task = tasks.find(t => t.id === currentDetailTaskId);
             if(!task.subtasks) task.subtasks = [];
@@ -771,54 +963,46 @@
         function toggleSubtask(subId) { const task = tasks.find(t => t.id === currentDetailTaskId); const sub = task.subtasks.find(s => s.id === subId); sub.completed = !sub.completed; saveUserData(); renderSubtasksModal(); renderTasks(); }
         function deleteSubtask(subId) { const task = tasks.find(t => t.id === currentDetailTaskId); task.subtasks = task.subtasks.filter(s => s.id !== subId); saveUserData(); renderSubtasksModal(); renderTasks(); }
 
-        /* ================== CHẾ ĐỘ TẬP TRUNG (FOCUS MODE - MỚI) ================== */
+        /* POMODORO FOCUS MODE */
         function openFocusMode(taskId) {
             currentDetailTaskId = taskId;
             const task = tasks.find(t => t.id === taskId);
             if(!task) return;
-            
-            document.getElementById('focus-task-name').innerText = task.text;
-            document.getElementById('focus-mode-overlay').classList.add('show');
-            
-            // Thiết lập mặc định là 25 phút
-            const defaultBtn = document.querySelectorAll('.f-opt-btn')[1]; // Nút giữa (25 phút)
+            getDom('focus-task-name').innerText = task.text;
+            getDom('focus-mode-overlay').classList.add('show');
+            const defaultBtn = document.querySelectorAll('.f-opt-btn')[1];
             setFocusTime(25, defaultBtn);
         }
 
         function closeFocusMode() {
-            document.getElementById('focus-mode-overlay').classList.remove('show');
-            if(isFocusRunning) toggleFocusTimer(); // Dừng nếu đang chạy
+            getDom('focus-mode-overlay').classList.remove('show');
+            if(isFocusRunning) toggleFocusTimer();
         }
 
         function setFocusTime(mins, btnElement) {
-            if(isFocusRunning) toggleFocusTimer(); // Tạm dừng nếu đang chạy
+            if(isFocusRunning) toggleFocusTimer();
             focusTotalTime = mins * 60;
             focusTimeLeft = focusTotalTime;
-            
-            // Cập nhật UI nút bấm
             document.querySelectorAll('.f-opt-btn').forEach(b => b.classList.remove('active'));
             if(btnElement) btnElement.classList.add('active');
-            
             updateFocusDisplay();
         }
 
         function updateFocusDisplay() {
             let m = Math.floor(focusTimeLeft / 60);
             let s = focusTimeLeft % 60;
-            document.getElementById('focus-timer-display').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            getDom('focus-timer-display').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         }
 
         function toggleFocusTimer() {
-            const playBtn = document.getElementById('focus-play-btn');
+            const playBtn = getDom('focus-play-btn');
             if(isFocusRunning) {
-                // Tạm dừng
                 clearInterval(focusInterval);
                 isFocusRunning = false;
                 playBtn.innerHTML = '<i class="fa-solid fa-play"></i> Tiếp tục';
                 playBtn.style.background = 'var(--text-main)';
                 playBtn.style.color = '#0f172a';
             } else {
-                // Bắt đầu chạy
                 isFocusRunning = true;
                 playBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Tạm dừng';
                 playBtn.style.background = 'var(--accent-cyan)';
@@ -827,15 +1011,13 @@
                 focusInterval = setInterval(() => {
                     focusTimeLeft--;
                     updateFocusDisplay();
-                    
                     if(focusTimeLeft <= 0) {
                         clearInterval(focusInterval);
                         isFocusRunning = false;
                         playBtn.innerHTML = '<i class="fa-solid fa-play"></i> Bắt đầu';
                         playBtn.style.background = 'var(--text-main)';
                         playBtn.style.color = '#0f172a';
-                        
-                        playBeepSound(); // Phát âm thanh
+                        playBeepSound();
                         showToast('Hoàn thành!', 'Bạn đã hoàn thành phiên tập trung xuất sắc!', 'info');
                     }
                 }, 1000);
@@ -848,23 +1030,32 @@
             updateFocusDisplay();
         }
 
-        // Phát âm thanh tiếng Beep đơn giản bằng Web Audio API
+        // Web Audio Context - Safe for Low-End PC & Mobile
         function playBeepSound() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gainNode = ctx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, ctx.currentTime);
-            gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.5);
+            try {
+                if (!audioCtxSingleton) {
+                    audioCtxSingleton = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtxSingleton.state === 'suspended') {
+                    audioCtxSingleton.resume();
+                }
+                const osc = audioCtxSingleton.createOscillator();
+                const gainNode = audioCtxSingleton.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(audioCtxSingleton.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtxSingleton.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtxSingleton.currentTime);
+                osc.start();
+                osc.stop(audioCtxSingleton.currentTime + 0.5);
+            } catch(e) {
+                console.log('Audio playback unavailable');
+            }
         }
 
-        /* ================== PHÂN TÍCH CHUYÊN SÂU ================== */
+        /* BẢO CÁO PHÂN TÍCH CHART.JS */
         function initChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
+            const ctx = getDom('performanceChart').getContext('2d');
             perfChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -876,7 +1067,10 @@
                     ]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    resizeDelay: 200, // Prevents CPU spikes on low-end PC window resizing
+                    animation: { duration: 100 }, // Reduced CPU animation overhead
                     interaction: { mode: 'index', intersect: false },
                     scales: {
                         x: { stacked: true, ticks: { color: '#94a3b8' }, grid: { display: false } },
@@ -938,7 +1132,9 @@
             perfChart.data.labels = labels; perfChart.data.datasets[0].data = rates; perfChart.data.datasets[1].data = doneArr; perfChart.data.datasets[2].data = pendingArr; perfChart.update();
 
             let overallRate = tot ? Math.round((comp / tot) * 100) : 0;
-            document.getElementById('kpi-total').innerText = tot; document.getElementById('kpi-done').innerText = comp; document.getElementById('kpi-rate').innerText = `${overallRate}%`;
+            getDom('kpi-total').innerText = tot; 
+            getDom('kpi-done').innerText = comp; 
+            getDom('kpi-rate').innerText = `${overallRate}%`;
 
             let analysisHtml = `<ul>`;
             if (tot === 0) {
@@ -953,7 +1149,7 @@
                 else analysisHtml += `<li><i class="fa-solid fa-shield-check" style="color:var(--priority-low);"></i> <b>Kỷ luật tốt:</b> Bạn không bỏ sót bất kỳ công việc ưu tiên cao nào!</li>`;
             }
             analysisHtml += `</ul>`;
-            document.getElementById('deep-analysis-content').innerHTML = analysisHtml;
+            getDom('deep-analysis-content').innerHTML = analysisHtml;
         }
 
         function escapeHtml(t) { const d = document.createElement('div'); d.innerText = t; return d.innerHTML; }
