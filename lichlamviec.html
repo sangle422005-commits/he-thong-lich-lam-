@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* CSS VARIABLE THEMES */
         [data-theme="dark"] {
             --bg-main: #09090b;
             --panel-bg: #18181b;
@@ -18,7 +17,6 @@
             --text-sub: #a1a1aa;
             --input-bg: #09090b;
             --btn-hover: #e4e4e7;
-            --chart-grid: rgba(255,255,255,0.05);
             --toast-bg: #18181b;
         }
 
@@ -31,99 +29,65 @@
             --text-sub: #64748b;
             --input-bg: #f8fafc;
             --btn-hover: #27272a;
-            --chart-grid: rgba(0,0,0,0.05);
             --toast-bg: #ffffff;
         }
 
-        /* Mobile & Low-End Performance Reset */
         * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
+            margin: 0; padding: 0; box-sizing: border-box; 
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            text-rendering: optimizeSpeed;
+            -webkit-tap-highlight-color: transparent; touch-action: manipulation; text-rendering: optimizeSpeed;
         }
 
         body { 
-            background-color: var(--bg-main); 
-            min-height: 100vh; 
-            color: var(--text-main); 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start; 
-            padding: 20px; 
+            background-color: var(--bg-main); min-height: 100vh; color: var(--text-main); 
+            display: flex; justify-content: center; align-items: flex-start; padding: 20px; 
             transition: background-color 0.2s, color 0.2s;
         }
 
-        /* --- WRAPPERS --- */
         .login-wrapper { width: 100%; max-width: 400px; margin-top: 80px; display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.25s ease; }
         .main-wrapper { width: 100%; max-width: 1200px; display: none; gap: 20px; animation: fadeIn 0.25s ease; flex-direction: row; align-items: flex-start; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- LAYOUT 2 CỘT --- */
         .sidebar-left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; position: sticky; top: 20px; }
         .workspace-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
 
-        /* --- FLUENT CARD BASE --- */
         .fluent-card { 
-            background: var(--panel-bg); 
-            border: 1px solid var(--panel-border); 
-            border-radius: 8px; 
-            padding: 20px; 
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); 
-            transition: border-color 0.2s, background-color 0.2s; 
-            overflow: hidden; 
-            contain: layout style paint;
-            transform: translate3d(0, 0, 0);
-            backface-visibility: hidden;
+            background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 8px; 
+            padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); 
+            transition: border-color 0.2s, background-color 0.2s; overflow: hidden; contain: layout style paint;
+            transform: translate3d(0, 0, 0); backface-visibility: hidden;
         }
 
-        /* --- SIDEBAR COMPONENTS --- */
         .user-panel { text-align: left; position: relative; }
         .user-panel h2 { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
         .user-panel p { font-size: 0.8rem; color: var(--text-sub); }
         .btn-logout { margin-top: 14px; width: 100%; background: transparent; border: 1px solid var(--panel-border); color: #ef4444; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: background 0.15s, border-color 0.15s; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn-logout:hover, .btn-logout:active { background: var(--input-bg); border-color: #ef4444; }
 
-        /* --- DROPDOWN CONTROL --- */
         .dropdown-menu-card { background: var(--panel-bg); border: 1px solid var(--panel-border); }
         .dropdown-label { font-size: 0.75rem; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         
         .function-dropdown { 
-            width: 100%; 
-            background: var(--input-bg); 
-            border: 1px solid var(--panel-border); 
-            color: var(--text-main); 
-            padding: 10px 12px; 
-            border-radius: 6px; 
-            font-size: 0.88rem; 
-            font-weight: 600; 
-            outline: none; 
-            cursor: pointer; 
-            transition: border-color 0.15s;
+            width: 100%; background: var(--input-bg); border: 1px solid var(--panel-border); 
+            color: var(--text-main); padding: 10px 12px; border-radius: 6px; font-size: 0.88rem; 
+            font-weight: 600; outline: none; cursor: pointer; transition: border-color 0.15s;
         }
         .function-dropdown:focus { border-color: var(--accent-primary); }
         .function-dropdown option { background: var(--panel-bg); color: var(--text-main); padding: 8px; }
 
-        /* --- CLOCK CARD --- */
         .clock-card { text-align: center; padding: 16px; background: var(--input-bg); }
         .clock-time { font-size: 2rem; font-weight: 800; letter-spacing: 2px; color: var(--text-main); font-variant-numeric: tabular-nums; }
         .clock-date { color: var(--text-sub); font-size: 0.8rem; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* --- DATE NAVIGATOR --- */
         .date-nav { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: var(--input-bg); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--panel-border); }
         .date-nav-btn { background: transparent; border: none; color: var(--text-sub); padding: 6px 10px; border-radius: 4px; cursor: pointer; transition: background 0.15s, color 0.15s; font-size: 0.8rem; }
         .date-nav-btn:hover, .date-nav-btn:active { background: var(--panel-border); color: var(--text-main); }
         .date-picker-input { background: transparent; border: none; color: var(--text-main); font-weight: 600; font-size: 0.85rem; cursor: pointer; outline: none; text-align: center; width: 110px; }
 
-        /* --- LOGIN SCREEN --- */
         .login-header { text-align: center; margin-bottom: 20px; }
         .login-header i { font-size: 2.2rem; color: var(--accent-primary); margin-bottom: 10px; }
 
-        /* --- ACCORDION & CARDS --- */
         .card-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
         .card-title { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 10px; color: var(--text-main); letter-spacing: -0.2px; }
         .toggle-icon { width: 28px; height: 28px; border-radius: 4px; background: var(--input-bg); border: 1px solid var(--panel-border); display: flex; align-items: center; justify-content: center; color: var(--text-sub); transition: transform 0.2s ease; }
@@ -131,7 +95,6 @@
         .card-body { max-height: 1800px; opacity: 1; margin-top: 16px; transition: max-height 0.25s ease, opacity 0.25s ease; }
         .fluent-card.collapsed .card-body { max-height: 0; opacity: 0; margin-top: 0; pointer-events: none; }
 
-        /* --- CHIPS & FORMS --- */
         .suggestion-header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .suggestion-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
         .sug-chip { background: var(--input-bg); border: 1px solid var(--panel-border); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; transition: border-color 0.15s, background 0.15s; contain: content; color: var(--text-main); }
@@ -151,23 +114,13 @@
         .btn-add { background: var(--accent-primary); color: var(--bg-main); border: none; padding: 10px 18px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.15s, opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-add:hover, .btn-add:active { opacity: 0.85; }
 
-        /* --- PROGRESS BARS --- */
         .pb-container { background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 4px; height: 6px; width: 100%; overflow: hidden; }
         .pb-fill { background: var(--accent-primary); height: 100%; width: 0%; transition: width 0.25s ease-out; }
         .daily-pb-wrap { margin-bottom: 16px; background: var(--input-bg); padding: 12px; border-radius: 6px; border: 1px solid var(--panel-border); }
 
-        /* --- TASK LIST --- */
         .task-list { 
-            list-style: none; 
-            max-height: 480px; 
-            overflow-y: auto; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 8px; 
-            margin-top: 12px; 
-            padding-right: 4px; 
-            contain: layout style paint;
-            -webkit-overflow-scrolling: touch;
+            list-style: none; max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; 
+            gap: 8px; margin-top: 12px; padding-right: 4px; contain: layout style paint; -webkit-overflow-scrolling: touch;
         }
         .task-list::-webkit-scrollbar { width: 4px; }
         .task-list::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 4px; }
@@ -189,13 +142,11 @@
         .task-item.completed .task-text { text-decoration: line-through; color: var(--text-sub); }
         .task-item.completed { opacity: 0.45; }
         
-        /* Action Buttons */
         .task-actions { display: flex; gap: 6px; align-items: center; }
         .btn-action { background: none; border: none; cursor: pointer; padding: 6px 8px; font-size: 0.95rem; color: var(--text-sub); opacity: 0.8; transition: color 0.15s, opacity 0.15s, background 0.15s; border-radius: 4px; }
         .btn-action.focus:hover, .btn-action.focus:active { opacity: 1; background: var(--panel-border); color: var(--text-main); }
         .btn-action.delete:hover, .btn-action.delete:active { opacity: 1; background: var(--panel-border); color: #ef4444; }
 
-        /* --- REAL-TIME STATUS --- */
         .status-tracker { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--panel-border); }
         .st-future { background: var(--panel-bg); color: var(--text-sub); }
         .st-upcoming { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
@@ -204,7 +155,6 @@
         .st-late-10 { background: var(--panel-bg); color: var(--text-main); border-color: var(--panel-border); }
         .st-late-20 { background: var(--panel-border); color: var(--text-main); border-color: var(--text-sub); }
 
-        /* --- ANALYTICS SECTION --- */
         .chart-controls { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
         .chart-btn { background: var(--input-bg); border: 1px solid var(--panel-border); color: var(--text-sub); padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600;}
         .chart-btn.active, .chart-btn:hover { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
@@ -218,22 +168,14 @@
         .deep-analysis-box li { display: flex; gap: 8px; align-items: flex-start; }
         .deep-analysis-box li i { margin-top: 3px; color: var(--accent-primary); }
 
-        /* --- MODALS & TOASTS --- */
         .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0, 0, 0, 0.75); 
-            display: none; justify-content: center; align-items: center; 
-            z-index: 1000; padding: 20px; opacity: 0; 
-            transition: opacity 0.2s ease; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); 
+            display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; opacity: 0; transition: opacity 0.2s ease; 
         }
         .modal-overlay.show { display: flex; opacity: 1; will-change: opacity; }
         .modal-content { 
-            background: var(--panel-bg); width: 100%; max-width: 440px; padding: 20px; 
-            border-radius: 8px; border: 1px solid var(--panel-border); 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4); 
-            transform: translateY(10px) translate3d(0,0,0); 
-            transition: transform 0.2s ease; 
-            display: flex; flex-direction: column; 
+            background: var(--panel-bg); width: 100%; max-width: 440px; padding: 20px; border-radius: 8px; border: 1px solid var(--panel-border); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: translateY(10px) translate3d(0,0,0); transition: transform 0.2s ease; display: flex; flex-direction: column; 
         }
         .modal-overlay.show .modal-content { transform: translateY(0) translate3d(0,0,0); }
         .modal-content h3 { color: var(--text-main); margin-bottom: 12px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
@@ -250,54 +192,38 @@
         .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; pointer-events: none;}
         .toast { 
             background: var(--toast-bg); border: 1px solid var(--panel-border); border-left: 4px solid var(--accent-primary); padding: 12px 16px; border-radius: 6px; color: var(--text-main); min-width: 240px; 
-            transform: translateX(120%) translate3d(0,0,0); 
-            transition: transform 0.25s ease; 
-            display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transform: translateX(120%) translate3d(0,0,0); transition: transform 0.25s ease; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
         .toast.show { transform: translateX(0) translate3d(0,0,0); }
         .toast-icon { font-size: 1.2rem; color: var(--accent-primary); }
 
-        /* FOCUS MODE OVERLAY */
         .focus-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-main); 
-            display: none; justify-content: center; align-items: center;
-            z-index: 9999; opacity: 0; transition: opacity 0.2s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); 
+            display: none; justify-content: center; align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.2s ease;
         }
         .focus-overlay.show { display: flex; opacity: 1; will-change: opacity; }
         .focus-close-btn {
-            position: absolute; top: 20px; right: 20px;
-            background: transparent; border: 1px solid var(--panel-border); color: var(--text-sub);
-            width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem;
-            cursor: pointer; transition: background 0.15s, color 0.15s;
+            position: absolute; top: 20px; right: 20px; background: transparent; border: 1px solid var(--panel-border); color: var(--text-sub);
+            width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: background 0.15s, color 0.15s;
         }
         .focus-close-btn:hover, .focus-close-btn:active { color: var(--bg-main); background: var(--text-main); border-color: var(--text-main); }
         .focus-content { text-align: center; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 600px; padding: 20px;}
         .focus-badge { background: var(--panel-bg); color: var(--text-main); padding: 6px 14px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; margin-bottom: 16px; letter-spacing: 0.5px; border: 1px solid var(--panel-border);}
         #focus-task-name { color: var(--text-main); font-size: 1.6rem; margin-bottom: 24px; font-weight: 700; line-height: 1.3;}
-        .focus-timer-display {
-            font-size: 5.5rem; font-weight: 800; font-variant-numeric: tabular-nums;
-            color: var(--text-main); margin-bottom: 24px; line-height: 1;
-        }
+        .focus-timer-display { font-size: 5.5rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-main); margin-bottom: 24px; line-height: 1; }
         .focus-time-options { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center;}
         .f-opt-btn {
-            background: var(--panel-bg); border: 1px solid var(--panel-border);
-            color: var(--text-sub); padding: 8px 16px; border-radius: 6px;
+            background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--text-sub); padding: 8px 16px; border-radius: 6px;
             font-size: 0.85rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600;
         }
         .f-opt-btn.active, .f-opt-btn:hover, .f-opt-btn:active { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
         .focus-controls { display: flex; gap: 12px; }
-        .f-ctrl-btn {
-            border: none; padding: 14px 32px; border-radius: 6px; font-size: 1rem;
-            font-weight: 700; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 8px;
-        }
+        .f-ctrl-btn { border: none; padding: 14px 32px; border-radius: 6px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 8px; }
         .f-ctrl-btn.play { background: var(--accent-primary); color: var(--bg-main); }
         .f-ctrl-btn.play:hover, .f-ctrl-btn.play:active { opacity: 0.9; }
         .f-ctrl-btn.stop { background: transparent; color: var(--text-main); border: 1px solid var(--panel-border); }
         .f-ctrl-btn.stop:hover, .f-ctrl-btn.stop:active { background: var(--panel-border); }
 
-        /* RESPONSIVE LAYOUT */
         @media (max-width: 850px) {
             body { padding: 12px; }
             .main-wrapper { flex-direction: column; gap: 14px; }
@@ -315,12 +241,12 @@
             <div class="login-header">
                 <i class="fa-solid fa-shield-halved"></i>
                 <h2>XÁC THỰC BẢO MẬT</h2>
-                <p style="color: var(--text-sub); font-size: 0.85rem;">Nhập danh tính để truy cập hệ thống</p>
+                <p style="color: var(--text-sub); font-size: 0.85rem;">Nhập danh tính để truy cập hệ thống server</p>
             </div>
             <div class="input-form">
                 <input type="text" id="login-username" class="input-field" placeholder="Nhập tên người dùng (VD: Thu, Nam...)">
                 <button class="btn-add" style="margin-top: 8px;" onclick="handleLogin()">
-                    Đăng Nhập <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    Đăng Nhập Server <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
             </div>
         </div>
@@ -334,7 +260,7 @@
             <!-- ACCOUNT PANEL -->
             <div class="fluent-card user-panel">
                 <h2 id="welcome-title"><i class="fa-solid fa-circle-user" style="color: var(--accent-primary);"></i> Xin chào</h2>
-                <p>Hệ thống Quản lý Thời gian & Hiệu suất</p>
+                <p>Hệ thống Server Quản lý Thời gian & Hiệu suất</p>
                 <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
             </div>
 
@@ -541,7 +467,7 @@
 
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- SCRIPT TÍNH NĂNG -->
+    <!-- SCRIPT TÍNH NĂNG SERVER INTEGRATED -->
     <script>
         let currentUser = null;
         let tasks = [];
@@ -563,18 +489,8 @@
 
         // DOM CACHE
         const domCache = {};
-
-        // Audio Context Instance
         let audioCtxSingleton = null;
-
-        // GC Optimization - Reuse static date object inside loop
         let staticLoopDate = new Date();
-
-        const defaultSuggestions = [
-            { id: 1, text: 'Tập thể dục 30 phút', icon: 'fa-person-running', priority: 'high' },
-            { id: 2, text: 'Uống đủ nước', icon: 'fa-glass-water', priority: 'medium' },
-            { id: 3, text: 'Đọc tài liệu chuyên môn', icon: 'fa-book-open', priority: 'low' }
-        ];
 
         const iconLibrary = [
             'fa-star', 'fa-bookmark', 'fa-person-running', 'fa-dumbbell', 'fa-laptop-code', 'fa-briefcase',
@@ -591,26 +507,56 @@
             return domCache[id];
         }
 
-        /* KHỞI TẠO */
         window.onload = () => {
-            initTheme();
             checkAuth();
             startClockLoop();
             renderIconPicker();
         };
 
-        /* THEME CONTROLLER */
-        function initTheme() {
-            const savedTheme = localStorage.getItem('app_theme') || 'dark';
-            setSystemTheme(savedTheme);
+        /* SERVER API CALLS */
+        async function fetchUserData(username) {
+            try {
+                const res = await fetch(`/api/user/${encodeURIComponent(username)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    tasks = data.tasks || [];
+                    suggestions = data.suggestions || [];
+                    currentTheme = data.theme || 'dark';
+                    setSystemTheme(currentTheme);
+                    renderSuggestions();
+                    renderTasks();
+                    if (!perfChart) initChart(); else updateChart();
+                }
+            } catch (err) {
+                console.error("Failed to fetch user data from server", err);
+            }
         }
 
+        async function syncUserDataToServer() {
+            if (!currentUser) return;
+            try {
+                await fetch('/api/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: currentUser,
+                        tasks: tasks,
+                        suggestions: suggestions,
+                        theme: currentTheme
+                    })
+                });
+            } catch (err) {
+                console.error("Failed to sync data to server", err);
+            }
+        }
+
+        /* THEME CONTROLLER */
         function setSystemTheme(theme) {
             currentTheme = theme;
             document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('app_theme', theme);
             getDom('theme-dropdown').value = theme;
             if (perfChart) updateChartColors();
+            syncUserDataToServer();
         }
 
         /* PAGE VISIBILITY API */
@@ -636,41 +582,55 @@
             }
         }
 
-        function checkAuth() {
-            currentUser = localStorage.getItem('logged_in_user');
-            if (currentUser) {
+        async function checkAuth() {
+            const savedUsername = sessionStorage.getItem('logged_in_user');
+            if (savedUsername) {
+                currentUser = savedUsername;
                 getDom('login-wrapper').style.display = 'none';
                 getDom('main-wrapper').style.display = 'flex';
                 getDom('welcome-title').innerHTML = `<i class="fa-solid fa-circle-user" style="color: var(--accent-primary);"></i> Xin chào, ${currentUser}`;
-                loadUserData();
                 getDom('current-date-picker').value = selectedDateStr;
-                renderSuggestions();
-                renderTasks();
-                if (!perfChart) initChart(); else updateChart();
+                await fetchUserData(currentUser);
             } else {
                 getDom('login-wrapper').style.display = 'flex';
                 getDom('main-wrapper').style.display = 'none';
             }
         }
 
-        function handleLogin() {
+        async function handleLogin() {
             const nameInput = getDom('login-username').value.trim();
             if (!nameInput) { alert('Vui lòng nhập tên người dùng!'); return; }
-            const formattedName = nameInput.charAt(0).toUpperCase() + nameInput.slice(1);
-            localStorage.setItem('logged_in_user', formattedName);
-            getDom('login-username').value = '';
-            checkAuth();
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: nameInput })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    currentUser = data.username;
+                    sessionStorage.setItem('logged_in_user', currentUser);
+                    getDom('login-username').value = '';
+                    checkAuth();
+                } else {
+                    alert('Lỗi đăng nhập server!');
+                }
+            } catch (err) {
+                alert('Không thể kết nối đến Server Render!');
+            }
         }
 
         function handleLogout() {
             if(confirm("Xác nhận đăng xuất khỏi hệ thống?")) {
-                localStorage.removeItem('logged_in_user');
+                sessionStorage.removeItem('logged_in_user');
+                currentUser = null;
                 alertedTasks = {};
                 checkAuth();
             }
         }
 
-        /* NAVIGATION DROPDOWN */
         function switchFunctionView(targetId) {
             const cards = ['sug-card', 'task-main-card', 'analytics-card'];
             cards.forEach(id => {
@@ -684,17 +644,6 @@
             });
         }
 
-        function loadUserData() {
-            tasks = JSON.parse(localStorage.getItem(`tasks_${currentUser}`)) || [];
-            tasks.forEach(t => { if(!t.subtasks) t.subtasks = []; });
-            suggestions = JSON.parse(localStorage.getItem(`suggestions_${currentUser}`)) || defaultSuggestions;
-        }
-        function saveUserData() {
-            localStorage.setItem(`tasks_${currentUser}`, JSON.stringify(tasks));
-            localStorage.setItem(`suggestions_${currentUser}`, JSON.stringify(suggestions));
-        }
-
-        /* TIME ENGINE */
         function runtimeLoop() {
             if(!currentUser) return;
             staticLoopDate.setTime(Date.now());
@@ -763,7 +712,6 @@
             return `${Math.floor(totalMins / 60)} giờ ${totalMins % 60} phút`;
         }
 
-        /* TOAST NOTIFICATION */
         function triggerToast(taskId, level, title, msg, type) {
             const alertKey = `${taskId}_${level}`;
             if (!alertedTasks[alertKey]) { showToast(title, msg, type); alertedTasks[alertKey] = true; }
@@ -778,7 +726,6 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 250); }, 5000);
         }
 
-        /* CARD TOGGLE & MODALS */
         function toggleCard(cardId) { getDom(cardId).classList.toggle('collapsed'); }
         function changeDate(offset) {
             let d = new Date(selectedDateStr); d.setDate(d.getDate() + offset);
@@ -790,7 +737,6 @@
         function openModal(id) { getDom(id).classList.add('show'); }
         function closeModal(id) { getDom(id).classList.remove('show'); }
 
-        /* SUGGESTIONS */
         function renderSuggestions() {
             const grid = getDom('suggestion-grid');
             let htmlStr = '';
@@ -818,15 +764,21 @@
             el.classList.add('active');
         }
         function openIconModal() { getDom('modal-sug-text').value = ''; openModal('icon-modal'); }
+        
         function saveCustomSuggestion() {
             const txt = getDom('modal-sug-text').value.trim();
             if(!txt) return alert('Vui lòng nhập tên gợi ý!');
             suggestions.push({id: Date.now(), text: txt, icon: selectedIcon, priority: 'medium'});
-            saveUserData(); renderSuggestions(); closeModal('icon-modal');
+            renderSuggestions(); closeModal('icon-modal');
+            syncUserDataToServer();
         }
-        function deleteSuggestion(id, e) { e.stopPropagation(); suggestions = suggestions.filter(s=>s.id!==id); saveUserData(); renderSuggestions(); }
+        function deleteSuggestion(id, e) { 
+            e.stopPropagation(); 
+            suggestions = suggestions.filter(s=>s.id!==id); 
+            renderSuggestions(); 
+            syncUserDataToServer();
+        }
 
-        /* TASK MANAGEMENT */
         getDom('task-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
 
         function addTask() {
@@ -840,14 +792,23 @@
                 endTime: getDom('task-end-time').value || null,
                 completed: false, subtasks: []
             });
-            saveUserData(); renderTasks(); updateChart();
+            renderTasks(); updateChart();
             getDom('task-input').value = ''; 
             getDom('task-start-time').value = ''; 
             getDom('task-end-time').value = '';
+            syncUserDataToServer();
         }
 
-        function toggleTask(id) { tasks = tasks.map(t=>t.id===id?{...t,completed:!t.completed}:t); saveUserData(); renderTasks(); updateChart(); }
-        function deleteTask(id) { tasks = tasks.filter(t=>t.id!==id); saveUserData(); renderTasks(); updateChart(); }
+        function toggleTask(id) { 
+            tasks = tasks.map(t=>t.id===id?{...t,completed:!t.completed}:t); 
+            renderTasks(); updateChart(); 
+            syncUserDataToServer();
+        }
+        function deleteTask(id) { 
+            tasks = tasks.filter(t=>t.id!==id); 
+            renderTasks(); updateChart(); 
+            syncUserDataToServer();
+        }
 
         function generateRecurringTasksForDate(target) {
             let mod = false;
@@ -864,7 +825,7 @@
                     mod = true;
                 }
             });
-            if(mod) saveUserData();
+            if(mod) syncUserDataToServer();
         }
 
         function renderTasks() {
@@ -920,7 +881,6 @@
             updateTaskTrackers(new Date()); 
         }
 
-        /* SUBTASKS */
         getDom('td-subtask-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addSubtask(); });
 
         function openTaskDetails(taskId) {
@@ -967,9 +927,9 @@
             getDom('td-progress-text').innerText = `${percent}%`;
 
             if(subs.length > 0 && doneCount === subs.length && !task.completed) {
-                task.completed = true; saveUserData(); renderTasks(); updateChart();
+                task.completed = true; renderTasks(); updateChart(); syncUserDataToServer();
             } else if (subs.length > 0 && doneCount < subs.length && task.completed) {
-                task.completed = false; saveUserData(); renderTasks(); updateChart();
+                task.completed = false; renderTasks(); updateChart(); syncUserDataToServer();
             }
         }
 
@@ -979,10 +939,10 @@
             const task = tasks.find(t => t.id === currentDetailTaskId);
             if(!task.subtasks) task.subtasks = [];
             task.subtasks.push({ id: Date.now(), text: text, completed: false });
-            saveUserData(); input.value = ''; renderSubtasksModal(); renderTasks();
+            input.value = ''; renderSubtasksModal(); renderTasks(); syncUserDataToServer();
         }
-        function toggleSubtask(subId) { const task = tasks.find(t => t.id === currentDetailTaskId); const sub = task.subtasks.find(s => s.id === subId); sub.completed = !sub.completed; saveUserData(); renderSubtasksModal(); renderTasks(); }
-        function deleteSubtask(subId) { const task = tasks.find(t => t.id === currentDetailTaskId); task.subtasks = task.subtasks.filter(s => s.id !== subId); saveUserData(); renderSubtasksModal(); renderTasks(); }
+        function toggleSubtask(subId) { const task = tasks.find(t => t.id === currentDetailTaskId); const sub = task.subtasks.find(s => s.id === subId); sub.completed = !sub.completed; renderSubtasksModal(); renderTasks(); syncUserDataToServer(); }
+        function deleteSubtask(subId) { const task = tasks.find(t => t.id === currentDetailTaskId); task.subtasks = task.subtasks.filter(s => s.id !== subId); renderSubtasksModal(); renderTasks(); syncUserDataToServer(); }
 
         /* POMODORO FOCUS MODE */
         function openFocusMode(taskId) {
@@ -1045,7 +1005,6 @@
             updateFocusDisplay();
         }
 
-        // Web Audio Context
         function playBeepSound() {
             try {
                 if (!audioCtxSingleton) {
