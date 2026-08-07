@@ -129,7 +129,7 @@ app.post('/api/sync', (req, res) => {
 
 // Catch-all route to serve the frontend
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
