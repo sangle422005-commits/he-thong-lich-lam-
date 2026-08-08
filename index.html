@@ -32,6 +32,19 @@
             --toast-bg: #ffffff;
         }
 
+        /* Office 365 Vibrant Theme */
+        [data-theme="office"] {
+            --bg-main: #f0f4f9;
+            --panel-bg: #ffffff;
+            --panel-border: #d2dbe5;
+            --accent-primary: #0f6cbd; /* Office 365 Blue */
+            --text-main: #111827;
+            --text-sub: #4b5563;
+            --input-bg: #f8fafc;
+            --btn-hover: #115ea3;
+            --toast-bg: #ffffff;
+        }
+
         * { 
             margin: 0; padding: 0; box-sizing: border-box; 
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -101,8 +114,8 @@
         .sug-chip:hover, .sug-chip:active { border-color: var(--accent-primary); background: var(--panel-border); }
         .sug-chip-del { color: var(--text-sub); font-size: 0.8rem; opacity: 0.6; padding: 2px 4px; }
         .sug-chip-del:hover { color: #ef4444; opacity: 1; }
-        .btn-custom-sug { background: transparent; border: 1px solid var(--text-main); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600; }
-        .btn-custom-sug:hover { background: var(--text-main); color: var(--bg-main); }
+        .btn-custom-sug { background: transparent; border: 1px solid var(--accent-primary); color: var(--accent-primary); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600; }
+        .btn-custom-sug:hover { background: var(--accent-primary); color: #ffffff; }
 
         .input-form { display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -111,7 +124,7 @@
         .input-row input[type="text"].input-field { flex: 2; min-width: 180px; }
         .input-row select.input-field, .input-row input[type="time"].input-field { flex: 1; min-width: 110px; cursor: pointer; }
         select.input-field option { background: var(--panel-bg); color: var(--text-main); }
-        .btn-add { background: var(--accent-primary); color: var(--bg-main); border: none; padding: 10px 18px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.15s, opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-add { background: var(--accent-primary); color: #ffffff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.15s, opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-add:hover, .btn-add:active { opacity: 0.85; }
 
         .pb-container { background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 4px; height: 6px; width: 100%; overflow: hidden; }
@@ -149,7 +162,7 @@
 
         .status-tracker { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--panel-border); }
         .st-future { background: var(--panel-bg); color: var(--text-sub); }
-        .st-upcoming { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
+        .st-upcoming { background: var(--accent-primary); color: #ffffff; border-color: var(--accent-primary); }
         .st-ongoing { background: var(--panel-border); color: var(--text-main); border-color: var(--text-sub); }
         .st-late-5 { background: var(--input-bg); color: var(--text-main); border-color: var(--panel-border); }
         .st-late-10 { background: var(--panel-bg); color: var(--text-main); border-color: var(--panel-border); }
@@ -157,7 +170,7 @@
 
         .chart-controls { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
         .chart-btn { background: var(--input-bg); border: 1px solid var(--panel-border); color: var(--text-sub); padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600;}
-        .chart-btn.active, .chart-btn:hover { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
+        .chart-btn.active, .chart-btn:hover { background: var(--accent-primary); color: #ffffff; border-color: var(--accent-primary); }
         .stats-grid { display: flex; gap: 8px; margin-bottom: 16px; }
         .stat-box { flex: 1; background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 6px; padding: 12px 8px; text-align: center; }
         .stat-box .s-val { font-size: 1.5rem; font-weight: 800; color: var(--text-main); display: block; margin-bottom: 2px; }
@@ -182,7 +195,7 @@
         .icon-picker-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 12px 0; max-height: 180px; overflow-y: auto; padding-right: 4px; -webkit-overflow-scrolling: touch; }
         .icon-option { background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 6px; height: 40px; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; color: var(--text-main); cursor: pointer; transition: border-color 0.15s; }
         .icon-option:hover, .icon-option:active { border-color: var(--accent-primary); }
-        .icon-option.active { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
+        .icon-option.active { background: var(--accent-primary); color: #ffffff; border-color: var(--accent-primary); }
         .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
         .btn-cancel { background: transparent; border: 1px solid var(--panel-border); color: var(--text-main); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
         .subtask-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 6px; margin-bottom: 6px; contain: content; }
@@ -206,7 +219,7 @@
             position: absolute; top: 20px; right: 20px; background: transparent; border: 1px solid var(--panel-border); color: var(--text-sub);
             width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: background 0.15s, color 0.15s;
         }
-        .focus-close-btn:hover, .focus-close-btn:active { color: var(--bg-main); background: var(--text-main); border-color: var(--text-main); }
+        .focus-close-btn:hover, .focus-close-btn:active { color: #ffffff; background: var(--text-main); border-color: var(--text-main); }
         .focus-content { text-align: center; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 600px; padding: 20px;}
         .focus-badge { background: var(--panel-bg); color: var(--text-main); padding: 6px 14px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; margin-bottom: 16px; letter-spacing: 0.5px; border: 1px solid var(--panel-border);}
         #focus-task-name { color: var(--text-main); font-size: 1.6rem; margin-bottom: 24px; font-weight: 700; line-height: 1.3;}
@@ -216,10 +229,10 @@
             background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--text-sub); padding: 8px 16px; border-radius: 6px;
             font-size: 0.85rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600;
         }
-        .f-opt-btn.active, .f-opt-btn:hover, .f-opt-btn:active { background: var(--accent-primary); color: var(--bg-main); border-color: var(--accent-primary); }
+        .f-opt-btn.active, .f-opt-btn:hover, .f-opt-btn:active { background: var(--accent-primary); color: #ffffff; border-color: var(--accent-primary); }
         .focus-controls { display: flex; gap: 12px; }
         .f-ctrl-btn { border: none; padding: 14px 32px; border-radius: 6px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 8px; }
-        .f-ctrl-btn.play { background: var(--accent-primary); color: var(--bg-main); }
+        .f-ctrl-btn.play { background: var(--accent-primary); color: #ffffff; }
         .f-ctrl-btn.play:hover, .f-ctrl-btn.play:active { opacity: 0.9; }
         .f-ctrl-btn.stop { background: transparent; color: var(--text-main); border: 1px solid var(--panel-border); }
         .f-ctrl-btn.stop:hover, .f-ctrl-btn.stop:active { background: var(--panel-border); }
@@ -289,6 +302,7 @@
                 <select id="theme-dropdown" class="function-dropdown" onchange="setSystemTheme(this.value)">
                     <option value="dark" selected>Theme Tối (Black)</option>
                     <option value="light">Theme Sáng (White)</option>
+                    <option value="office">Office 365 (Vibrant)</option>
                 </select>
             </div>
 
@@ -1127,15 +1141,20 @@
         function initChart() {
             const ctx = getDom('performanceChart').getContext('2d');
             const isDark = currentTheme === 'dark';
+            const isOffice = currentTheme === 'office';
             
+            let mainColor = isDark ? '#ffffff' : (isOffice ? '#0f6cbd' : '#09090b');
+            let doneColor = isOffice ? '#107c41' : (isDark ? '#71717a' : '#94a3b8');
+            let pendingColor = isOffice ? '#d13438' : (isDark ? '#27272a' : '#cbd5e1');
+
             perfChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: [],
                     datasets: [
-                        { type: 'line', label: 'Tỷ lệ %', data: [], borderColor: isDark ? '#ffffff' : '#09090b', backgroundColor: isDark ? '#ffffff' : '#09090b', yAxisID: 'y1', tension: 0.2, fill: false, borderWidth: 2, pointRadius: 3 },
-                        { type: 'bar', label: 'Hoàn thành', data: [], backgroundColor: isDark ? '#71717a' : '#94a3b8', yAxisID: 'y' },
-                        { type: 'bar', label: 'Chưa xong', data: [], backgroundColor: isDark ? '#27272a' : '#cbd5e1', yAxisID: 'y' }
+                        { type: 'line', label: 'Tỷ lệ %', data: [], borderColor: mainColor, backgroundColor: mainColor, yAxisID: 'y1', tension: 0.2, fill: false, borderWidth: 2, pointRadius: 3 },
+                        { type: 'bar', label: 'Hoàn thành', data: [], backgroundColor: doneColor, yAxisID: 'y' },
+                        { type: 'bar', label: 'Chưa xong', data: [], backgroundColor: pendingColor, yAxisID: 'y' }
                     ]
                 },
                 options: {
@@ -1147,7 +1166,7 @@
                     scales: {
                         x: { stacked: true, ticks: { color: isDark ? '#a1a1aa' : '#64748b' }, grid: { display: false } },
                         y: { stacked: true, beginAtZero: true, ticks: { color: isDark ? '#a1a1aa' : '#64748b', stepSize: 1 }, grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } },
-                        y1: { position: 'right', beginAtZero: true, max: 100, ticks: { color: isDark ? '#ffffff' : '#09090b' }, grid: { drawOnChartArea: false } }
+                        y1: { position: 'right', beginAtZero: true, max: 100, ticks: { color: mainColor }, grid: { drawOnChartArea: false } }
                     },
                     plugins: { legend: { labels: { color: isDark ? '#fafafa' : '#0f172a' } } }
                 }
@@ -1158,14 +1177,16 @@
         function updateChartColors() {
             if (!perfChart) return;
             const isDark = currentTheme === 'dark';
-            const mainColor = isDark ? '#ffffff' : '#09090b';
+            const isOffice = currentTheme === 'office';
+
+            const mainColor = isDark ? '#ffffff' : (isOffice ? '#0f6cbd' : '#09090b');
             const subColor = isDark ? '#a1a1aa' : '#64748b';
             const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
 
             perfChart.data.datasets[0].borderColor = mainColor;
             perfChart.data.datasets[0].backgroundColor = mainColor;
-            perfChart.data.datasets[1].backgroundColor = isDark ? '#71717a' : '#94a3b8';
-            perfChart.data.datasets[2].backgroundColor = isDark ? '#27272a' : '#cbd5e1';
+            perfChart.data.datasets[1].backgroundColor = isOffice ? '#107c41' : (isDark ? '#71717a' : '#94a3b8');
+            perfChart.data.datasets[2].backgroundColor = isOffice ? '#d13438' : (isDark ? '#27272a' : '#cbd5e1');
 
             perfChart.options.scales.x.ticks.color = subColor;
             perfChart.options.scales.y.ticks.color = subColor;
