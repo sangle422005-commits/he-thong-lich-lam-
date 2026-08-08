@@ -8,20 +8,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Monochrome Theme (Formerly Dark/Black) */
+        /* Firefox-Inspired Dark & Vibrant Theme (Replaces Pure Monochrome) */
         [data-theme="monochrome"] {
-            --bg-main: #09090b;
-            --panel-bg: #18181b;
-            --panel-border: #27272a;
-            --accent-primary: #ffffff;
-            --text-main: #fafafa;
-            --text-sub: #a1a1aa;
-            --input-bg: #09090b;
-            --btn-hover: #e4e4e7;
-            --toast-bg: #18181b;
+            --bg-main: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31103f 100%);
+            --panel-bg: rgba(30, 27, 75, 0.7);
+            --panel-border: rgba(168, 85, 247, 0.3);
+            --accent-primary: #ff7139; /* Firefox Flame Orange */
+            --text-main: #f8fafc;
+            --text-sub: #cbd5e1;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --btn-hover: #e05626;
+            --toast-bg: #1e1b4b;
         }
 
-        /* Colorful Theme (Formerly Office 365) */
+        [data-theme="monochrome"] .fluent-card {
+            border-top: 3px solid #ff7139;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.15);
+        }
+
+        /* Colorful Theme (Office 365 Inspired) */
         [data-theme="colorful"] {
             --bg-main: linear-gradient(135deg, #e0eefc 0%, #e8eaf6 50%, #e0f2fe 100%);
             --panel-bg: #ffffff;
@@ -556,7 +563,6 @@
 
         function initInitialTheme() {
             const localTheme = localStorage.getItem('app_theme') || 'monochrome';
-            // Migrates old values if present in storage
             const validTheme = (localTheme === 'colorful' || localTheme === 'office') ? 'colorful' : 'monochrome';
             setSystemTheme(validTheme);
         }
@@ -1163,7 +1169,7 @@
                 const osc = audioCtxSingleton.createOscillator();
                 const gainNode = audioCtxSingleton.createGain();
                 osc.connect(gainNode);
-                gainNode.connect(audioCtxSingleton.destination);
+                gainNode.gain.connect(audioCtxSingleton.destination);
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(800, audioCtxSingleton.currentTime);
                 gainNode.gain.setValueAtTime(0.1, audioCtxSingleton.currentTime);
@@ -1180,9 +1186,9 @@
             const isMonochrome = currentTheme === 'monochrome';
             const isColorful = currentTheme === 'colorful';
             
-            let mainColor = isMonochrome ? '#ffffff' : '#0f6cbd';
-            let doneColor = isColorful ? '#107c41' : '#71717a';
-            let pendingColor = isColorful ? '#d13438' : '#27272a';
+            let mainColor = isMonochrome ? '#ff7139' : '#0f6cbd';
+            let doneColor = isColorful ? '#107c41' : '#38bdf8';
+            let pendingColor = isColorful ? '#d13438' : '#a855f7';
 
             perfChart = new Chart(ctx, {
                 type: 'bar',
@@ -1201,11 +1207,11 @@
                     animation: { duration: 100 }, 
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        x: { stacked: true, ticks: { color: isMonochrome ? '#a1a1aa' : '#64748b' }, grid: { display: false } },
-                        y: { stacked: true, beginAtZero: true, ticks: { color: isMonochrome ? '#a1a1aa' : '#64748b', stepSize: 1 }, grid: { color: isMonochrome ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } },
+                        x: { stacked: true, ticks: { color: isMonochrome ? '#cbd5e1' : '#64748b' }, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, ticks: { color: isMonochrome ? '#cbd5e1' : '#64748b', stepSize: 1 }, grid: { color: isMonochrome ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' } },
                         y1: { position: 'right', beginAtZero: true, max: 100, ticks: { color: mainColor }, grid: { drawOnChartArea: false } }
                     },
-                    plugins: { legend: { labels: { color: isMonochrome ? '#fafafa' : '#0f172a' } } }
+                    plugins: { legend: { labels: { color: isMonochrome ? '#f8fafc' : '#0f172a' } } }
                 }
             });
             updateChart();
@@ -1216,20 +1222,20 @@
             const isMonochrome = currentTheme === 'monochrome';
             const isColorful = currentTheme === 'colorful';
 
-            const mainColor = isMonochrome ? '#ffffff' : '#0f6cbd';
-            const subColor = isMonochrome ? '#a1a1aa' : '#64748b';
-            const gridColor = isMonochrome ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+            const mainColor = isMonochrome ? '#ff7139' : '#0f6cbd';
+            const subColor = isMonochrome ? '#cbd5e1' : '#64748b';
+            const gridColor = isMonochrome ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
 
             perfChart.data.datasets[0].borderColor = mainColor;
             perfChart.data.datasets[0].backgroundColor = mainColor;
-            perfChart.data.datasets[1].backgroundColor = isColorful ? '#107c41' : '#71717a';
-            perfChart.data.datasets[2].backgroundColor = isColorful ? '#d13438' : '#27272a';
+            perfChart.data.datasets[1].backgroundColor = isColorful ? '#107c41' : '#38bdf8';
+            perfChart.data.datasets[2].backgroundColor = isColorful ? '#d13438' : '#a855f7';
 
             perfChart.options.scales.x.ticks.color = subColor;
             perfChart.options.scales.y.ticks.color = subColor;
             perfChart.options.scales.y.grid.color = gridColor;
             perfChart.options.scales.y1.ticks.color = mainColor;
-            perfChart.options.plugins.legend.labels.color = isMonochrome ? '#fafafa' : '#0f172a';
+            perfChart.options.plugins.legend.labels.color = isMonochrome ? '#f8fafc' : '#0f172a';
 
             perfChart.update();
         }
