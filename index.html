@@ -114,8 +114,8 @@
         .sug-chip:hover, .sug-chip:active { border-color: var(--accent-primary); background: var(--panel-border); }
         .sug-chip-del { color: var(--text-sub); font-size: 0.8rem; opacity: 0.6; padding: 2px 4px; }
         .sug-chip-del:hover { color: #ef4444; opacity: 1; }
-        .btn-custom-sug { background: transparent; border: 1px solid var(--accent-primary); color: var(--accent-primary); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600; }
-        .btn-custom-sug:hover { background: var(--accent-primary); color: #ffffff; }
+        .btn-custom-sug { background: transparent; border: 1px solid var(--text-main); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 600; }
+        .btn-custom-sug:hover { background: var(--text-main); color: var(--bg-main); }
 
         .input-form { display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -266,6 +266,17 @@
                 <input type="text" id="login-username" class="input-field" placeholder="Tên người dùng (VD: Thu, Nam...)">
                 <input type="password" id="login-password" class="input-field" placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)">
                 
+                <div style="margin-top: 4px; margin-bottom: 4px;">
+                    <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">
+                        Giao Diện (Theme)
+                    </label>
+                    <select id="login-theme-dropdown" class="function-dropdown" onchange="setSystemTheme(this.value)">
+                        <option value="dark" selected>Theme Tối (Black)</option>
+                        <option value="light">Theme Sáng (White)</option>
+                        <option value="office">Office 365 (Vibrant)</option>
+                    </select>
+                </div>
+
                 <button class="btn-add" id="auth-submit-btn" style="margin-top: 8px;" onclick="handleAuthSubmit()">
                     Đăng Nhập <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
@@ -532,10 +543,16 @@
         }
 
         window.onload = () => {
+            initInitialTheme();
             checkAuth();
             startClockLoop();
             renderIconPicker();
         };
+
+        function initInitialTheme() {
+            const localTheme = localStorage.getItem('app_theme') || 'dark';
+            setSystemTheme(localTheme);
+        }
 
         /* MULTI-DEVICE SYNCING POLLER */
         function startMultiDeviceSync() {
@@ -579,7 +596,8 @@
                     if (data.theme && data.theme !== currentTheme) {
                         currentTheme = data.theme;
                         document.documentElement.setAttribute('data-theme', currentTheme);
-                        getDom('theme-dropdown').value = currentTheme;
+                        if (getDom('theme-dropdown')) getDom('theme-dropdown').value = currentTheme;
+                        if (getDom('login-theme-dropdown')) getDom('login-theme-dropdown').value = currentTheme;
                         if (perfChart) updateChartColors();
                     }
                 }
@@ -651,7 +669,7 @@
                     const data = await res.json();
                     tasks = data.tasks || [];
                     suggestions = data.suggestions || [];
-                    currentTheme = data.theme || 'dark';
+                    currentTheme = data.theme || currentTheme;
                     setSystemTheme(currentTheme);
                     renderSuggestions();
                     renderTasks();
@@ -684,9 +702,13 @@
         function setSystemTheme(theme) {
             currentTheme = theme;
             document.documentElement.setAttribute('data-theme', theme);
-            getDom('theme-dropdown').value = theme;
+            localStorage.setItem('app_theme', theme);
+            
+            if (getDom('theme-dropdown')) getDom('theme-dropdown').value = theme;
+            if (getDom('login-theme-dropdown')) getDom('login-theme-dropdown').value = theme;
+            
             if (perfChart) updateChartColors();
-            syncUserDataToServer();
+            if (currentUser) syncUserDataToServer();
         }
 
         /* PAGE VISIBILITY API */
