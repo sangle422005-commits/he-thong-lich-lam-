@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" data-theme="dark">
+<html lang="vi" data-theme="monochrome">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,7 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        [data-theme="dark"] {
+        /* Monochrome Theme (Formerly Dark/Black) */
+        [data-theme="monochrome"] {
             --bg-main: #09090b;
             --panel-bg: #18181b;
             --panel-border: #27272a;
@@ -20,20 +21,8 @@
             --toast-bg: #18181b;
         }
 
-        [data-theme="light"] {
-            --bg-main: #f1f5f9;
-            --panel-bg: #ffffff;
-            --panel-border: #e2e8f0;
-            --accent-primary: #09090b;
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-            --input-bg: #f8fafc;
-            --btn-hover: #27272a;
-            --toast-bg: #ffffff;
-        }
-
-        /* Office 365 Vibrant Colorful Theme */
-        [data-theme="office"] {
+        /* Colorful Theme (Formerly Office 365) */
+        [data-theme="colorful"] {
             --bg-main: linear-gradient(135deg, #e0eefc 0%, #e8eaf6 50%, #e0f2fe 100%);
             --panel-bg: #ffffff;
             --panel-border: #c7d2fe;
@@ -45,21 +34,21 @@
             --toast-bg: #ffffff;
         }
 
-        /* Office Theme Specific Card Accent Top Ribbon */
-        [data-theme="office"] .fluent-card {
+        /* Colorful Theme Accent Ribbons */
+        [data-theme="colorful"] .fluent-card {
             border-top: 4px solid var(--accent-primary);
             box-shadow: 0 10px 25px -5px rgba(15, 108, 189, 0.12), 0 8px 10px -6px rgba(15, 108, 189, 0.08);
         }
 
-        [data-theme="office"] #analytics-card {
+        [data-theme="colorful"] #analytics-card {
             border-top-color: #6264a7; /* Teams Purple Accent */
         }
 
-        [data-theme="office"] #sug-card {
+        [data-theme="colorful"] #sug-card {
             border-top-color: #d83b01; /* PowerPoint Orange Accent */
         }
 
-        [data-theme="office"] #task-main-card {
+        [data-theme="colorful"] #task-main-card {
             border-top-color: #107c41; /* Excel Green Accent */
         }
 
@@ -289,9 +278,8 @@
                         Giao Diện (Theme)
                     </label>
                     <select id="login-theme-dropdown" class="function-dropdown" onchange="setSystemTheme(this.value)">
-                        <option value="dark" selected>Theme Tối (Black)</option>
-                        <option value="light">Theme Sáng (White)</option>
-                        <option value="office">Office 365 (Vibrant)</option>
+                        <option value="monochrome" selected>Monochrome</option>
+                        <option value="colorful">Colorful</option>
                     </select>
                 </div>
 
@@ -329,9 +317,8 @@
             <div class="fluent-card dropdown-menu-card">
                 <div class="dropdown-label"><i class="fa-solid fa-circle-half-stroke"></i> Giao Diện (Theme)</div>
                 <select id="theme-dropdown" class="function-dropdown" onchange="setSystemTheme(this.value)">
-                    <option value="dark" selected>Theme Tối (Black)</option>
-                    <option value="light">Theme Sáng (White)</option>
-                    <option value="office">Office 365 (Vibrant)</option>
+                    <option value="monochrome" selected>Monochrome</option>
+                    <option value="colorful">Colorful</option>
                 </select>
             </div>
 
@@ -526,7 +513,7 @@
         let selectedDateStr = new Date().toISOString().split('T')[0];
         let currentPeriod = 'week';
         let perfChart = null;
-        let currentTheme = 'dark';
+        let currentTheme = 'monochrome';
         let authMode = 'login'; 
         
         let alertedTasks = {}; 
@@ -568,8 +555,10 @@
         };
 
         function initInitialTheme() {
-            const localTheme = localStorage.getItem('app_theme') || 'dark';
-            setSystemTheme(localTheme);
+            const localTheme = localStorage.getItem('app_theme') || 'monochrome';
+            // Migrates old values if present in storage
+            const validTheme = (localTheme === 'colorful' || localTheme === 'office') ? 'colorful' : 'monochrome';
+            setSystemTheme(validTheme);
         }
 
         /* MULTI-DEVICE SYNCING POLLER */
@@ -612,7 +601,8 @@
                     }
 
                     if (data.theme && data.theme !== currentTheme) {
-                        currentTheme = data.theme;
+                        let normalizedTheme = (data.theme === 'colorful' || data.theme === 'office') ? 'colorful' : 'monochrome';
+                        currentTheme = normalizedTheme;
                         document.documentElement.setAttribute('data-theme', currentTheme);
                         if (getDom('theme-dropdown')) getDom('theme-dropdown').value = currentTheme;
                         if (getDom('login-theme-dropdown')) getDom('login-theme-dropdown').value = currentTheme;
@@ -687,8 +677,15 @@
                     const data = await res.json();
                     tasks = data.tasks || [];
                     suggestions = data.suggestions || [];
-                    currentTheme = data.theme || currentTheme;
-                    setSystemTheme(currentTheme);
+                    
+                    let targetTheme = data.theme || currentTheme;
+                    if (targetTheme === 'dark' || targetTheme === 'light' || targetTheme === 'monochrome') {
+                        targetTheme = 'monochrome';
+                    } else if (targetTheme === 'office' || targetTheme === 'colorful') {
+                        targetTheme = 'colorful';
+                    }
+                    
+                    setSystemTheme(targetTheme);
                     renderSuggestions();
                     renderTasks();
                     if (!perfChart) initChart(); else updateChart();
@@ -718,12 +715,12 @@
 
         /* THEME CONTROLLER */
         function setSystemTheme(theme) {
-            currentTheme = theme;
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('app_theme', theme);
+            currentTheme = (theme === 'colorful') ? 'colorful' : 'monochrome';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('app_theme', currentTheme);
             
-            if (getDom('theme-dropdown')) getDom('theme-dropdown').value = theme;
-            if (getDom('login-theme-dropdown')) getDom('login-theme-dropdown').value = theme;
+            if (getDom('theme-dropdown')) getDom('theme-dropdown').value = currentTheme;
+            if (getDom('login-theme-dropdown')) getDom('login-theme-dropdown').value = currentTheme;
             
             if (perfChart) updateChartColors();
             if (currentUser) syncUserDataToServer();
@@ -1180,12 +1177,12 @@
         /* CHART.JS ANALYTICS */
         function initChart() {
             const ctx = getDom('performanceChart').getContext('2d');
-            const isDark = currentTheme === 'dark';
-            const isOffice = currentTheme === 'office';
+            const isMonochrome = currentTheme === 'monochrome';
+            const isColorful = currentTheme === 'colorful';
             
-            let mainColor = isDark ? '#ffffff' : (isOffice ? '#0f6cbd' : '#09090b');
-            let doneColor = isOffice ? '#107c41' : (isDark ? '#71717a' : '#94a3b8');
-            let pendingColor = isOffice ? '#d13438' : (isDark ? '#27272a' : '#cbd5e1');
+            let mainColor = isMonochrome ? '#ffffff' : '#0f6cbd';
+            let doneColor = isColorful ? '#107c41' : '#71717a';
+            let pendingColor = isColorful ? '#d13438' : '#27272a';
 
             perfChart = new Chart(ctx, {
                 type: 'bar',
@@ -1204,11 +1201,11 @@
                     animation: { duration: 100 }, 
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        x: { stacked: true, ticks: { color: isDark ? '#a1a1aa' : '#64748b' }, grid: { display: false } },
-                        y: { stacked: true, beginAtZero: true, ticks: { color: isDark ? '#a1a1aa' : '#64748b', stepSize: 1 }, grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } },
+                        x: { stacked: true, ticks: { color: isMonochrome ? '#a1a1aa' : '#64748b' }, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, ticks: { color: isMonochrome ? '#a1a1aa' : '#64748b', stepSize: 1 }, grid: { color: isMonochrome ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } },
                         y1: { position: 'right', beginAtZero: true, max: 100, ticks: { color: mainColor }, grid: { drawOnChartArea: false } }
                     },
-                    plugins: { legend: { labels: { color: isDark ? '#fafafa' : '#0f172a' } } }
+                    plugins: { legend: { labels: { color: isMonochrome ? '#fafafa' : '#0f172a' } } }
                 }
             });
             updateChart();
@@ -1216,23 +1213,23 @@
 
         function updateChartColors() {
             if (!perfChart) return;
-            const isDark = currentTheme === 'dark';
-            const isOffice = currentTheme === 'office';
+            const isMonochrome = currentTheme === 'monochrome';
+            const isColorful = currentTheme === 'colorful';
 
-            const mainColor = isDark ? '#ffffff' : (isOffice ? '#0f6cbd' : '#09090b');
-            const subColor = isDark ? '#a1a1aa' : '#64748b';
-            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+            const mainColor = isMonochrome ? '#ffffff' : '#0f6cbd';
+            const subColor = isMonochrome ? '#a1a1aa' : '#64748b';
+            const gridColor = isMonochrome ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
 
             perfChart.data.datasets[0].borderColor = mainColor;
             perfChart.data.datasets[0].backgroundColor = mainColor;
-            perfChart.data.datasets[1].backgroundColor = isOffice ? '#107c41' : (isDark ? '#71717a' : '#94a3b8');
-            perfChart.data.datasets[2].backgroundColor = isOffice ? '#d13438' : (isDark ? '#27272a' : '#cbd5e1');
+            perfChart.data.datasets[1].backgroundColor = isColorful ? '#107c41' : '#71717a';
+            perfChart.data.datasets[2].backgroundColor = isColorful ? '#d13438' : '#27272a';
 
             perfChart.options.scales.x.ticks.color = subColor;
             perfChart.options.scales.y.ticks.color = subColor;
             perfChart.options.scales.y.grid.color = gridColor;
             perfChart.options.scales.y1.ticks.color = mainColor;
-            perfChart.options.plugins.legend.labels.color = isDark ? '#fafafa' : '#0f172a';
+            perfChart.options.plugins.legend.labels.color = isMonochrome ? '#fafafa' : '#0f172a';
 
             perfChart.update();
         }
