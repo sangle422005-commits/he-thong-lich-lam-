@@ -32,17 +32,35 @@
             --toast-bg: #ffffff;
         }
 
-        /* Office 365 Vibrant Theme */
+        /* Office 365 Vibrant Colorful Theme */
         [data-theme="office"] {
-            --bg-main: #f0f4f9;
+            --bg-main: linear-gradient(135deg, #e0eefc 0%, #e8eaf6 50%, #e0f2fe 100%);
             --panel-bg: #ffffff;
-            --panel-border: #d2dbe5;
-            --accent-primary: #0f6cbd; /* Office 365 Blue */
-            --text-main: #111827;
-            --text-sub: #4b5563;
-            --input-bg: #f8fafc;
+            --panel-border: #c7d2fe;
+            --accent-primary: #0f6cbd; /* Office Blue */
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --input-bg: #f1f5f9;
             --btn-hover: #115ea3;
             --toast-bg: #ffffff;
+        }
+
+        /* Office Theme Specific Card Accent Top Ribbon */
+        [data-theme="office"] .fluent-card {
+            border-top: 4px solid var(--accent-primary);
+            box-shadow: 0 10px 25px -5px rgba(15, 108, 189, 0.12), 0 8px 10px -6px rgba(15, 108, 189, 0.08);
+        }
+
+        [data-theme="office"] #analytics-card {
+            border-top-color: #6264a7; /* Teams Purple Accent */
+        }
+
+        [data-theme="office"] #sug-card {
+            border-top-color: #d83b01; /* PowerPoint Orange Accent */
+        }
+
+        [data-theme="office"] #task-main-card {
+            border-top-color: #107c41; /* Excel Green Accent */
         }
 
         * { 
@@ -52,9 +70,9 @@
         }
 
         body { 
-            background-color: var(--bg-main); min-height: 100vh; color: var(--text-main); 
+            background: var(--bg-main); background-attachment: fixed; min-height: 100vh; color: var(--text-main); 
             display: flex; justify-content: center; align-items: flex-start; padding: 20px; 
-            transition: background-color 0.2s, color 0.2s;
+            transition: background 0.2s, color 0.2s;
         }
 
         .login-wrapper { width: 100%; max-width: 400px; margin-top: 80px; display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.25s ease; }
@@ -829,7 +847,7 @@
             let lateMins = Math.floor(Math.abs(diffMs) / 60000);
             if (lateMins >= 20) {
                 triggerToast(task.id, 'late20', `Cảnh báo: ${task.text}`, `Đã quá hạn ${typeStr.toLowerCase()} ${lateMins} phút!`, 'danger');
-                return `<div class="status-tracker st-late-20"><i class="fa-solid fa-triangle-exclamation"></i> Quá hạn ${lateMins} phút</div>`;
+                return `<div class="status-tracker st-late-20"><i class="fa-solid fa-triangle-exclamation"></i> Quá hạn ${lateMins} phút!</div>`;
             } else if (lateMins >= 10) {
                 triggerToast(task.id, 'late10', `Nhắc nhở: ${task.text}`, `Đã trễ ${lateMins} phút!`, 'warning');
                 return `<div class="status-tracker st-late-10"><i class="fa-solid fa-circle-exclamation"></i> Trễ ${lateMins} phút</div>`;
