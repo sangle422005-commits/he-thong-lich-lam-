@@ -309,7 +309,12 @@
             <div class="fluent-card user-panel">
                 <h2 id="welcome-title"><i class="fa-solid fa-circle-user" style="color: var(--accent-primary);"></i> Xin chào</h2>
                 <p>Hệ thống Quản lý Thời gian & Hiệu suất</p>
-                <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
+                <button class="btn-logout" style="margin-top: 14px; color: var(--text-main); border-color: var(--panel-border);" onclick="openModal('change-password-modal')">
+                    <i class="fa-solid fa-key"></i> Đổi mật khẩu
+                </button>
+                <button class="btn-logout" style="margin-top: 8px;" onclick="handleLogout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                </button>
             </div>
 
             <!-- NAVIGATION DROPDOWN -->
