@@ -453,7 +453,17 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="fluent-card" id="smart-garden-card" style="display: none;">
+                <div class="card-header" onclick="toggleCard('smart-garden-card')">
+                    <div class="card-title"><i class="fa-solid fa-leaf" style="color: #107c41;"></i> Hệ Thống Điều Khiển Sân Vườn</div>
+                    <div class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
 
+                <div class="card-body" style="padding: 0; margin-top: 16px; border-radius: 6px; overflow: hidden; height: 800px;">
+                    <iframe src="https://do-an-tuoi-cay.onrender.com/" style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -849,8 +859,9 @@ async function submitChangePassword() {
                 showToast('Lỗi mạng', 'Không thể kết nối đến máy chủ.', 'danger');
             }
         }
-        function switchFunctionView(targetId) {
-            const cards = ['sug-card', 'task-main-card', 'analytics-card'];
+      function switchFunctionView(targetId) {
+            // Thêm 'smart-garden-card' vào danh sách
+            const cards = ['sug-card', 'task-main-card', 'analytics-card', 'smart-garden-card']; 
             cards.forEach(id => {
                 const el = getDom(id);
                 if (targetId === 'all' || id === targetId) {
@@ -861,7 +872,6 @@ async function submitChangePassword() {
                 }
             });
         }
-
         function runtimeLoop() {
             if(!currentUser) return;
             staticLoopDate.setTime(Date.now());
