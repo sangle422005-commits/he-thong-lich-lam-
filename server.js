@@ -173,7 +173,30 @@ app.post('/api/sync', async (req, res) => {
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
+// --- API ĐỔI MẬT KHẨU ---
+app.post('/api/change-password', (req, res) => {
+    const { username, oldPassword, newPassword } = req.body;
+    
+    // Tìm kiếm người dùng trong hệ thống (biến users của bạn)
+    const user = users.find(u => u.username === username);
+    
+    if (!user) {
+        return res.status(404).json({ error: 'Không tìm thấy tài khoản!' });
+    }
+    
+    // Kiểm tra mật khẩu cũ
+    if (user.password !== oldPassword) {
+        return res.status(400).json({ error: 'Mật khẩu hiện tại không chính xác!' });
+    }
+    
+    // Cập nhật mật khẩu mới và lưu lại
+    user.password = newPassword;
+    
+    // LƯU Ý: Đừng quên lưu mảng users vào file (nếu bạn có dùng fs.writeFileSync)
+    // fs.writeFileSync('users.json', JSON.stringify(users, null, 2));
 
+    res.json({ success: true, message: 'Đổi mật khẩu thành công!' });
+});
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
